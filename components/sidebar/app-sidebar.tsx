@@ -8,7 +8,6 @@ import {
   FolderIcon,
   HelpCircleIcon,
   LayoutDashboardIcon,
-  ListIcon,
   SearchIcon,
   UsersIcon,
 } from "lucide-react";
@@ -43,11 +42,6 @@ const data = {
       title: "Dashboard",
       url: "/dashboard",
       icon: LayoutDashboardIcon,
-    },
-    {
-      title: "AI Analysis",
-      url: "/ai-analysis",
-      icon: ListIcon,
     },
     {
       title: "AI Trends",

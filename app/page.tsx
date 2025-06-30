@@ -11,6 +11,7 @@ export default function Page() {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isCsvFile = (file: File) => file.name.toLowerCase().endsWith('.csv');
@@ -58,6 +59,15 @@ export default function Page() {
     inputRef.current?.click();
   };
 
+  const handleUpload = () => {
+    setIsUploading(true);
+    // Simulate upload delay
+    setTimeout(() => {
+      setIsUploading(false);
+      // Optionally clear file or show success
+    }, 2000);
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar variant="inset" />
@@ -73,7 +83,7 @@ export default function Page() {
                 </CardDescription>
               </div>
               {selectedFile && (
-                <Button className="ml-4 mt-1" variant="default">
+                <Button className="ml-4 mt-1" variant="default" onClick={handleUpload} disabled={isUploading}>
                   Upload <CloudUpload className="ml-2 cursor-pointer h-4 w-4" />
                 </Button>
               )}
@@ -83,12 +93,13 @@ export default function Page() {
                 className={`flex flex-col items-center justify-center text-center p-24 border-2 border-dashed rounded-lg transition-colors duration-200 ${
                   dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
                 }`}
-                onDragEnter={handleDrag}
-                onDragOver={handleDrag}
-                onDragLeave={handleDrag}
-                onDrop={handleDrop}
-                onClick={handleButtonClick}
-                style={{ cursor: "pointer" }}
+                onDragEnter={isUploading ? undefined : handleDrag}
+                onDragOver={isUploading ? undefined : handleDrag}
+                onDragLeave={isUploading ? undefined : handleDrag}
+                onDrop={isUploading ? undefined : handleDrop}
+                onClick={isUploading ? undefined : handleButtonClick}
+                style={{ cursor: isUploading ? "not-allowed" : "pointer", opacity: isUploading ? 0.6 : 1 }}
+                aria-disabled={isUploading}
               >
                 <input
                   type="file"
@@ -96,21 +107,31 @@ export default function Page() {
                   ref={inputRef}
                   style={{ display: "none" }}
                   onChange={handleChange}
+                  disabled={isUploading}
                 />
-                {selectedFile ? <FileSpreadsheet className="w-16 h-16 text-green-600/80" /> : <UploadIcon className="w-16 h-16 text-gray-400" />}
+                {selectedFile ? <FileSpreadsheet className="w-16 h-16 text-primary/80" /> : <UploadIcon className="w-16 h-16 text-gray-400" />}
                 <h3 className="mt-6 text-xl font-semibold">Upload Content Data</h3>
                 {!selectedFile && <p className="mt-2 text-md text-muted-foreground">
                   Drag and drop your CSV file here, or click to browse.
                 </p>}
                 {selectedFile && (
-                  <div className="mt-4 text-green-600 font-medium">
+                  <div className="mt-4 text-primary font-medium">
                     Selected: {selectedFile.name}
                   </div>
                 )}
-                <Button className="mt-6 cursor-pointer" onClick={e => { e.stopPropagation(); handleButtonClick(); }}>
-                  <FileTextIcon className="mr-2 h-4 w-4" />
-                  Select {selectedFile&&"A New"} File
-                </Button>
+                {isUploading ? (
+                  <div className="w-full flex flex-col items-center mt-6">
+                    <div className="w-48 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-primary animate-pulse w-full" style={{ minWidth: 32 }} />
+                    </div>
+                    <span className="mt-2 text-sm text-primary">Uploading...</span>
+                  </div>
+                ) : (
+                  <Button variant={"outline"} className="mt-6 cursor-pointer" onClick={e => { e.stopPropagation(); handleButtonClick(); }} disabled={isUploading}>
+                    <FileTextIcon className="mr-2 h-4 w-4" />
+                    Select {selectedFile && "A New"} File
+                  </Button>
+                )}
                 {error && (
                   <div className="mt-4 text-red-600 font-medium">
                     {error}

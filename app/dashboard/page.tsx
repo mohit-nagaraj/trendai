@@ -2,8 +2,8 @@ import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SectionCards } from "@/components/sections/section-cards";
 import { DataTable } from "@/components/visuals/data-table";
-import { ChartPieDonut } from "@/components/visuals/chart-pie-donut";
-import { ChartBarMixed } from "@/components/visuals/chart-bar-mixed";
+// import { ChartPieDonut } from "@/components/visuals/chart-pie-donut";
+// import { ChartBarMixed } from "@/components/visuals/chart-bar-mixed";
 import { ChartAreaInteractive } from "@/components/visuals/chart-area-interactive";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import data from "@/data.json";
@@ -22,14 +22,14 @@ export default function DashboardPage() {
                 <ChartAreaInteractive />
               </div>
               <DataTable data={data} />
-              <div className="flex gap-4 px-4 lg:px-6">
+              {/* <div className="flex gap-4 px-4 lg:px-6">
                 <div className="basis-1/2">
                   <ChartPieDonut />
                 </div>
                 <div className="basis-1/2">
                   <ChartBarMixed />
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
