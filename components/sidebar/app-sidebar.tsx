@@ -79,11 +79,6 @@ const data = {
       url: "/file-uploads",
       icon: DatabaseIcon,
     },
-    {
-      name: "Reports",
-      url: "/reports",
-      icon: ClipboardListIcon,
-    },
   ],
 };
 

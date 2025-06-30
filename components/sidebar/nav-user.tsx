@@ -28,6 +28,9 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export function NavUser({
   user: initialUser,
@@ -42,6 +45,9 @@ export function NavUser({
   const [user, setUser] = useState(initialUser);
   const router = useRouter();
   const supabase = createClient();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [displayName, setDisplayName] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -53,6 +59,7 @@ export function NavUser({
         });
       }
     });
+    if (user?.name) setDisplayName(user.name!="shadcn" ? user.name : "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -60,6 +67,19 @@ export function NavUser({
     await supabase.auth.signOut();
     toast.success("Logged out", { duration: 2000 });
     router.replace("/auth");
+  };
+
+  const handleSaveDisplayName = async () => {
+    setSaving(true);
+    const { error } = await supabase.auth.updateUser({ data: { display_name: displayName } });
+    setSaving(false);
+    if (!error) {
+      setUser((prev: { name: string; email: string; avatar: string }) => ({ ...prev, name: displayName }));
+      toast.success("Display name updated", { duration: 2000 });
+      setDialogOpen(false);
+    } else {
+      toast.error(error.message || "Failed to update display name");
+    }
   };
 
   return (
@@ -106,7 +126,7 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDialogOpen(true)}>
                 <UserCircleIcon />
                 Account
               </DropdownMenuItem>
@@ -127,6 +147,27 @@ export function NavUser({
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
+      {/* Account Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Display Name</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              value={displayName}
+              onChange={e => setDisplayName(e.target.value)}
+              placeholder="Enter display name"
+              disabled={saving}
+            />
+          </div>
+          <DialogFooter>
+            <Button onClick={handleSaveDisplayName} disabled={saving || !displayName.trim()}>
+              {saving ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SidebarMenu>
   );
 }

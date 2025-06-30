@@ -10,8 +10,7 @@ const ROUTES = [
   { label: "AI Trends", value: "/ai-trends" },
   { label: "Videos", value: "/videos" },
   { label: "Team", value: "/team" },
-  { label: "File Uploads", value: "/file-uploads" },
-  { label: "Reports", value: "/reports" },
+  { label: "File Uploads", value: "/file-uploads" }
 ];
 
 export function CommandPalette() {
