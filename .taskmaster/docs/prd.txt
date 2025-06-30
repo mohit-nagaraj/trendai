@@ -1,0 +1,500 @@
+# Final Round AI - Social Media Analytics & Trend Intelligence Platform
+
+## Overview
+
+**Product Vision**: A comprehensive social media analytics and trend intelligence platform that enables Final Round AI to analyze content performance, identify emerging trends, and generate AI-powered content ideas to optimize their social media strategy.
+
+**Problem Statement**: Final Round AI needs to systematically analyze their Q2 social media performance across Instagram and TikTok, identify what content works, track relevant trends, and generate actionable content ideas. Currently, this process is manual, time-consuming, and lacks AI-powered insights.
+
+**Target Users**: 
+- Final Round AI marketing team
+- Content creators and strategists
+- Social media managers
+- Growth team members
+
+**Value Proposition**: 
+- Automated content performance analysis with AI insights
+- Real-time trend tracking with relevance scoring
+- AI-generated content ideas tied to trends and brand positioning
+- Centralized dashboard for data-driven content strategy decisions
+
+## Core Features
+
+### 1. Authentication & User Management
+**What it does**: Secure access control ensuring only authorized Final Round AI team members can access sensitive analytics data.
+**Why it's important**: Protects proprietary content performance data and ensures data privacy.
+**How it works**: JWT-based authentication with Supabase Auth, role-based access control.
+
+### 2. Content Analysis Pipeline
+**What it does**: Processes exported social media data (CSV) to analyze performance metrics, extract insights using Gemini AI, and store results in database.
+**Why it's important**: Transforms raw social media exports into actionable insights about what content performs well.
+**How it works**: 
+- File upload with duplicate detection
+- Gemini AI analysis of captions, performance metrics
+- Automated pipeline processing with status tracking
+- Results stored in Supabase with detailed logs
+
+### 3. Performance Dashboard
+**What it does**: Visual summary of content performance with key metrics, top performers, and detailed analytics.
+**Why it's important**: Provides quick overview of social media performance and identifies successful content patterns.
+**How it works**: 
+- Aggregate metrics display (avg engagement, reach, etc.)
+- Interactive charts and visualizations
+- Detailed post-level analysis with AI insights
+- Export capabilities for reports
+
+### 4. Trend Intelligence System
+**What it does**: Tracks current social media trends, scores relevance to Final Round AI, and generates content ideas.
+**Why it's important**: Helps create timely, relevant content that leverages trending topics for maximum reach.
+**How it works**: 
+- 24-hour automatic trend fetching from multiple sources
+- AI-powered relevance scoring for Final Round AI's audience
+- Content idea generation with hooks and visual inspirations
+- Detailed logging of all AI processing results
+
+### 5. AI-Powered Content Ideation
+**What it does**: Generates 10+ original content ideas based on trending topics, tied to Final Round AI's product and audience pain points.
+**Why it's important**: Accelerates content creation process with data-driven, AI-generated ideas.
+**How it works**: 
+- Integration with trend data and historical performance
+- Gemini AI content generation with specific prompts
+- Hook examples and visual style suggestions
+- Performance prediction based on historical data
+
+## User Experience
+
+### User Personas
+
+**Primary User - Marketing Manager**
+- Needs: Quick performance insights, trend awareness, content strategy guidance
+- Goals: Improve engagement rates, create viral content, optimize posting strategy
+- Pain Points: Time-consuming manual analysis, difficulty identifying trends, inconsistent content performance
+
+**Secondary User - Content Creator** 
+- Needs: Content inspiration, performance feedback, trend integration
+- Goals: Create engaging content, understand audience preferences, stay relevant
+- Pain Points: Creative blocks, unclear performance drivers, trend identification
+
+### Key User Flows
+
+**Flow 1: Content Analysis**
+1. User logs in → Dashboard overview
+2. Clicks "Import Content Data" → File upload interface
+3. Uploads CSV export → Processing pipeline triggered
+4. Views processing status → Waits for completion
+5. Accesses detailed analysis → Reviews AI insights and metrics
+
+**Flow 2: Trend Intelligence**
+1. User navigates to Trends page → Overview of current trends
+2. Clicks "Refresh Trends" (if >24hrs) → Fetches latest data
+3. Reviews trend cards → Clicks specific trend for details
+4. Views AI analysis log → Sees relevance scoring and reasoning
+5. Accesses content ideas → Reviews generated suggestions with hooks
+
+**Flow 3: Performance Review**
+1. User accesses dashboard → Views aggregate performance metrics
+2. Clicks on specific post → Detailed analysis opens
+3. Reviews AI insights → Understands performance drivers
+4. Compares with top performers → Identifies patterns
+5. Exports findings → Shares with team
+
+### UI/UX Considerations
+
+- **Clean, data-focused design** with emphasis on readability
+- **Real-time status indicators** for processing pipelines
+- **Interactive visualizations** using charts and graphs
+- **Mobile-responsive** design for on-the-go access
+- **Progressive disclosure** - summary first, details on demand
+- **Clear visual hierarchy** with consistent design system
+
+## Technical Architecture
+
+### System Components
+
+**Frontend (Next.js)**
+```
+/frontend
+├── pages/
+│   ├── auth/
+│   │   └── login.js
+│   ├── dashboard/
+│   │   └── index.js (Content Analysis)
+│   ├── trends/
+│   │   └── index.js (Trend Intelligence)
+│   └── api/
+│       ├── content/
+│       ├── trends/
+│       └── auth/
+├── components/
+│   ├── charts/
+│   ├── upload/
+│   ├── processing/
+│   └── insights/
+└── hooks/
+    ├── useAuth.js
+    ├── useContent.js
+    └── useTrends.js
+```
+
+**Backend APIs (Next.js API Routes)**
+- Authentication endpoints
+- File upload and processing
+- Content analysis triggers
+- Trend fetching and scoring
+- Data retrieval and aggregation
+
+**Database Schema (Supabase)**
+```sql
+-- Users table (managed by Supabase Auth)
+
+-- Content table
+CREATE TABLE content (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  post_id TEXT UNIQUE NOT NULL,
+  account_id TEXT NOT NULL,
+  account_username TEXT NOT NULL,
+  description TEXT,
+  duration_sec INTEGER,
+  publish_time TIMESTAMP,
+  permalink TEXT,
+  post_type TEXT,
+  platform TEXT DEFAULT 'instagram',
+  views INTEGER,
+  reach INTEGER,
+  likes INTEGER,
+  shares INTEGER,
+  follows INTEGER,
+  comments INTEGER,
+  saves INTEGER,
+  engagement_rate DECIMAL,
+  processing_status TEXT DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- AI Analysis table
+CREATE TABLE content_analysis (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  content_id UUID REFERENCES content(id),
+  ai_insights JSONB,
+  performance_score DECIMAL,
+  key_themes TEXT[],
+  hook_effectiveness DECIMAL,
+  recommendations TEXT[],
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Trends table
+CREATE TABLE trends (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  trend_name TEXT NOT NULL,
+  platform TEXT NOT NULL,
+  relevance_score DECIMAL,
+  reasoning TEXT,
+  content_angle TEXT,
+  fetch_date DATE DEFAULT CURRENT_DATE,
+  status TEXT DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Content Ideas table
+CREATE TABLE content_ideas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  trend_id UUID REFERENCES trends(id),
+  title TEXT NOT NULL,
+  content_outline TEXT,
+  hooks TEXT[],
+  hashtags TEXT[],
+  visual_style TEXT,
+  performance_prediction JSONB,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Processing Logs table
+CREATE TABLE processing_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  process_type TEXT NOT NULL, -- 'content_analysis', 'trend_fetch', 'idea_generation'
+  status TEXT NOT NULL, -- 'running', 'completed', 'failed'
+  input_data JSONB,
+  output_data JSONB,
+  error_message TEXT,
+  started_at TIMESTAMP DEFAULT NOW(),
+  completed_at TIMESTAMP
+);
+```
+
+### APIs and Integrations
+
+**Gemini AI Integration**
+- Content analysis and insight generation
+- Trend relevance scoring
+- Content idea generation
+- Hook effectiveness analysis
+
+**Trend Data Sources**
+- Twitter/X trending topics API
+- TikTok Creative Center (public data)
+- YouTube trending videos API
+- Google Trends API
+- Reddit trending topics
+
+**File Processing**
+- CSV parsing with Papa Parse
+- Duplicate detection logic
+- Batch processing pipeline
+- Error handling and logging
+
+### Infrastructure Requirements
+
+**Development Environment**
+- Next.js 14+ with TypeScript
+- Supabase (Database + Auth)
+- Gemini AI API access
+- Vercel deployment (recommended)
+
+**Production Considerations**
+- Environment variable management
+- Rate limiting for AI API calls
+- File upload size limits
+- Database connection pooling
+- Monitoring and alerting
+
+## Development Roadmap
+
+### Phase 1: Foundation & Authentication (MVP Core)
+**Scope**: Basic application structure with secure access
+**Deliverables**:
+- Next.js project setup with TypeScript - already done
+- Supabase integration (database + auth)
+- Authentication flow (login/logout)
+- Basic routing structure
+- Database schema implementation
+- Protected route middleware
+
+### Phase 2: Content Upload & Processing (MVP Content)
+**Scope**: Core content analysis functionality
+**Deliverables**:
+- File upload component with CSV validation
+- CSV parsing and data extraction
+- Duplicate detection logic
+- Basic content storage in database
+- Processing status tracking
+- Simple dashboard view with imported content
+
+### Phase 3: AI Analysis Pipeline (MVP Intelligence)
+**Scope**: Gemini AI integration for content insights
+**Deliverables**:
+- Gemini AI service setup
+- Content analysis pipeline
+- Performance metric calculations
+- AI insight storage and retrieval
+- Processing logs system
+- Basic insight display on frontend
+
+### Phase 4: Performance Dashboard (MVP Visualization)
+**Scope**: Visual analytics and reporting
+**Deliverables**:
+- Aggregate metrics calculation
+- Chart components (engagement, reach, etc.)
+- Top performers identification
+- Detailed post analysis views
+- Performance comparison features
+- Export functionality
+
+### Phase 5: Trend Intelligence System (MVP Trends)
+**Scope**: Trend tracking and analysis
+**Deliverables**:
+- Trend fetching from multiple sources
+- 24-hour refresh logic
+- AI-powered relevance scoring
+- Trend storage and management
+- Trend dashboard page
+- Manual refresh capability
+
+### Phase 6: Content Ideation Engine (MVP Ideas)
+**Scope**: AI-generated content suggestions
+**Deliverables**:
+- Content idea generation pipeline
+- Hook and visual style suggestions
+- Performance prediction model
+- Idea storage and organization
+- Detailed idea view with rationale
+- Integration with trend data
+
+### Phase 7: Enhanced Analytics & Reporting (V2 Features)
+**Scope**: Advanced analytics and insights
+**Deliverables**:
+- Time-series analysis
+- Comparative performance reports
+- Advanced filtering and search
+- Bulk operations
+- Custom report generation
+- Team collaboration features
+
+### Phase 8: Platform Expansion (V2 Platform)
+**Scope**: Support for additional social platforms
+**Deliverables**:
+- TikTok data processing
+- YouTube analytics integration
+- Cross-platform performance comparison
+- Platform-specific insights
+- Unified reporting across platforms
+
+## Logical Dependency Chain
+
+### Critical Path Development Order
+
+**1. Foundation First (Authentication + Database)**
+- Cannot proceed without secure access and data storage
+- Establishes core infrastructure for all other features
+- Enables team access and collaboration
+
+**2. Data Ingestion (File Upload + Processing)**
+- Core functionality - everything else depends on having data
+- Must handle CSV parsing and duplicate detection
+- Establishes processing pipeline architecture
+
+**3. Basic Visualization (Simple Dashboard)**
+- Provides immediate value and visual feedback
+- Allows testing with real data quickly
+- Validates data processing pipeline
+
+**4. AI Integration (Content Analysis)**
+- Adds intelligence layer to raw data
+- Differentiates from basic analytics tools
+- Enables advanced insights and recommendations
+
+**5. Trend System (Independent Pipeline)**
+- Can be developed in parallel with content analysis
+- Provides external data source for content ideas
+- Establishes second major pipeline
+
+**6. Content Ideation (Combines Everything)**
+- Requires both content analysis and trend data
+- Represents the most sophisticated feature
+- Provides maximum value to users
+
+### Rapid Prototyping Strategy
+
+**Week 1 Goal**: Working file upload with basic display
+- Focus on getting data in and showing it
+- Minimal UI, functional core
+- Validates entire data flow
+
+**Week 2 Goal**: AI insights on imported content
+- Gemini integration with basic analysis
+- Shows intelligent processing capability
+- Proves AI integration works
+
+**Week 3 Goal**: Trend tracking with content ideas
+- External data integration
+- AI-powered content generation
+- Complete feature set demonstration
+
+## Risks and Mitigations
+
+### Technical Challenges
+
+**Risk**: Gemini AI API rate limits and costs
+**Mitigation**: 
+- Implement caching for similar content
+- Batch processing to optimize API calls
+- Cost monitoring and budget alerts
+- Fallback to simpler analysis if needed
+
+**Risk**: Large CSV file processing performance
+**Mitigation**:
+- Streaming CSV parsing for large files
+- Background job processing
+- Progress indicators for user feedback
+- File size limits with clear messaging
+
+**Risk**: Trend data source reliability
+**Mitigation**:
+- Multiple data sources for redundancy
+- Graceful error handling
+- Cached fallback data
+- Manual refresh capabilities
+
+### MVP Definition and Scope
+
+**Risk**: Feature creep delaying core functionality
+**Mitigation**:
+- Strict MVP definition focused on file upload + AI analysis
+- Core user journey prioritization
+- Phase-gate approach with working demos
+- Regular scope review and adjustment
+
+**Risk**: AI analysis quality and relevance
+**Mitigation**:
+- Iterative prompt engineering
+- A/B testing different AI approaches
+- Human validation of AI outputs
+- Feedback loop for continuous improvement
+
+### Resource Constraints
+
+**Risk**: Development timeline pressure
+**Mitigation**:
+- Focus on core features first
+- Use proven technology stack
+- Leverage existing components and libraries
+- Regular progress check-ins
+
+**Risk**: API costs exceeding budget
+**Mitigation**:
+- Usage monitoring and alerts
+- Efficient API call patterns
+- Caching strategies
+- Alternative analysis methods as backup
+
+## Appendix
+
+### Research Findings
+
+**CSV Data Structure Analysis**:
+Based on provided samples, Instagram exports contain:
+- Post metadata (ID, username, description)
+- Performance metrics (views, reach, likes, shares, follows, comments, saves)
+- Publishing details (timestamp, permalink, post type)
+- Account information (ID, username, display name)
+
+**Gemini AI Capabilities**:
+- Text analysis and insight generation
+- Video understanding (for future TikTok integration)
+- Structured output generation
+- Multi-modal content analysis
+
+**Trend Data Sources**:
+- Twitter/X API for trending topics
+- TikTok Creative Center for trending sounds/hashtags
+- YouTube Data API for trending videos
+- Google Trends for search patterns
+- Reddit API for community trends
+
+### Technical Specifications
+
+**File Upload Requirements**:
+- Support CSV files up to 10MB
+- Validate CSV structure before processing
+- Handle various encoding formats (UTF-8, UTF-16)
+- Progress tracking for large file uploads
+
+**AI Processing Requirements**:
+- Batch processing for efficiency
+- Retry logic for failed API calls
+- Result caching to avoid reprocessing
+- Error logging and monitoring
+
+**Performance Requirements**:
+- Dashboard load time < 3 seconds
+- File processing feedback within 30 seconds
+- Trend refresh completion within 2 minutes
+- Support for 1000+ content pieces
+
+**Security Requirements**:
+- JWT token authentication
+- Row Level Security (RLS) in Supabase
+- File upload sanitization
+- API rate limiting
+- Environment variable protection

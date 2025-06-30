@@ -1,0 +1,620 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Database Schema Implementation",
+        "description": "Implement the complete database schema in Supabase, including tables for content, AI analysis, trends, content ideas, and processing logs, as specified in the PRD.",
+        "details": "Create the `content`, `content_analysis`, `trends`, `content_ideas`, and `processing_logs` tables in Supabase. Ensure all columns, data types (UUID, TEXT, INTEGER, DECIMAL, TIMESTAMP, JSONB, TEXT[]), primary keys, unique constraints (e.g., post_id in content), foreign key relationships (e.g., content_id in content_analysis, trend_id in content_ideas), and default values (e.g., gen_random_uuid(), NOW(), CURRENT_DATE) are precisely defined according to the provided SQL schema. Implement Row Level Security (RLS) for data protection.",
+        "testStrategy": "Verify table creation and schema integrity using Supabase Studio. Insert sample data into each table to confirm correct data types, constraints, and relationships. Test RLS policies to ensure only authorized users can access/modify data.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define and Create Core Tables",
+            "description": "Design and implement the initial schema for 'content', 'content_analysis', 'trends', 'content_ideas', and 'processing_logs' tables, including all necessary columns and their respective data types (e.g., TEXT, TIMESTAMP, INTEGER, JSONB).",
+            "dependencies": [],
+            "details": "This subtask focuses on the foundational structure of each table.",
+            "status": "done"
+          },
+          {
+            "id": 2,
+            "title": "Implement Primary and Unique Keys",
+            "description": "Add primary key constraints to all appropriate tables and define unique constraints for columns requiring unique values (e.g., content_id, trend_name) to ensure data uniqueness and efficient retrieval.",
+            "dependencies": [
+              1
+            ],
+            "details": "This builds upon the initial table creation by adding essential indexing and uniqueness constraints.",
+            "status": "done"
+          },
+          {
+            "id": 3,
+            "title": "Establish Foreign Key Relationships",
+            "description": "Define and implement foreign key constraints between related tables (e.g., 'content_analysis' referencing 'content', 'content_ideas' referencing 'trends') to ensure referential integrity and maintain data consistency across the database.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "This step links the tables together based on their logical relationships.",
+            "status": "done"
+          },
+          {
+            "id": 4,
+            "title": "Configure Default Values for Columns",
+            "description": "Set appropriate default values for columns where applicable (e.g., 'created_at' timestamps, 'status' fields, boolean flags) to streamline data insertion and maintain consistency without requiring explicit values on every insert.",
+            "dependencies": [
+              1
+            ],
+            "details": "This optimizes data entry and ensures consistent initial states for new records.",
+            "status": "done"
+          },
+          {
+            "id": 5,
+            "title": "Design and Implement Row Level Security (RLS)",
+            "description": "Develop and apply Row Level Security policies for each table to control data access based on user roles or specific conditions, ensuring data confidentiality and integrity at a granular level.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "This critical security step ensures that users only see and interact with data they are authorized for.",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Supabase Authentication & User Management",
+        "description": "Set up JWT-based authentication using Supabase Auth for secure user access and implement role-based access control for Final Round AI team members.",
+        "details": "Integrate Supabase Auth into the Next.js frontend using the `useAuth.js` hook. Implement user login, logout, and session management flows. Protect Next.js API routes and frontend pages using Supabase's authentication middleware or server-side checks to ensure only authenticated users can access sensitive data. Configure Supabase to manage user roles if role-based access control is required beyond basic authentication.",
+        "testStrategy": "Test user registration, login, and logout functionalities. Verify that protected routes are inaccessible without proper authentication. Check the validity and refresh mechanism of JWT tokens. Confirm that different user roles (if implemented) have appropriate access levels.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate Supabase Auth into Next.js Frontend",
+            "description": "Develop a `useAuth.js` hook for Supabase authentication, implement user login, registration, and logout UI components, and handle basic user state in the frontend.",
+            "dependencies": [],
+            "details": "This involves setting up the Supabase client in the Next.js app, creating UI for user interactions (sign-up, sign-in, sign-out), and managing the user session state on the client-side.",
+            "status": "pending"
+          },
+          {
+            "id": 2,
+            "title": "Implement Supabase Session and JWT Handling",
+            "description": "Configure Supabase client for secure session management, ensure proper storage and refresh of JWT tokens, and handle token expiration and renewal processes within the Next.js application.",
+            "dependencies": [
+              1
+            ],
+            "details": "Focus on how Supabase handles sessions and JWTs, ensuring tokens are securely stored (e.g., in cookies) and automatically refreshed to maintain user sessions without requiring re-authentication.",
+            "status": "pending"
+          },
+          {
+            "id": 3,
+            "title": "Secure Next.js API Routes and Frontend Pages",
+            "description": "Implement authentication middleware for Next.js API routes to protect backend endpoints and apply server-side authentication checks (e.g., `getServerSideProps` or middleware) to restrict access to specific frontend pages based on user authentication status.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "This involves creating middleware functions to verify user authentication on API requests and using Next.js server-side rendering or route protection mechanisms to guard sensitive frontend pages.",
+            "status": "pending"
+          },
+          {
+            "id": 4,
+            "title": "Implement Role-Based Access Control (RBAC)",
+            "description": "Configure Supabase RLS (Row Level Security) and implement logic in Next.js to assign and manage user roles (e.g., 'admin', 'member'). Restrict access to specific features, data, or UI elements based on the authenticated user's role.",
+            "dependencies": [
+              3
+            ],
+            "details": "This subtask focuses on defining roles, assigning them to users, and enforcing access policies both at the database level (Supabase RLS) and within the Next.js application logic to control what users can see and do based on their assigned role.",
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Content Data Ingestion API & Logic",
+        "description": "Develop the Next.js API endpoints and backend logic for handling CSV file uploads, parsing content data, detecting duplicates, and storing it in the Supabase `content` table.",
+        "details": "Create a Next.js API route (e.g., `/api/content/upload`) to receive CSV file uploads. Use `Papa Parse` for efficient streaming CSV parsing. Implement logic to validate the CSV structure against expected fields (post_id, description, views, etc.). Before inserting, check for duplicate `post_id` entries in the `content` table to prevent redundant data. Store parsed data in the `content` table and update the `processing_status` to 'pending' for subsequent AI analysis. Implement robust error handling for file processing.",
+        "testStrategy": "Upload various CSV files (valid, invalid format, large, small, with duplicates). Verify that data is correctly parsed and stored in the `content` table. Confirm duplicate detection prevents re-insertion. Check `processing_status` updates. Test error responses for malformed CSVs or failed uploads.",
+        "priority": "high",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Develop Next.js API Endpoint for CSV Uploads",
+            "description": "Create a new Next.js API route (e.g., `/api/ingest-content`) that accepts CSV file uploads. This endpoint should be configured to handle file streams efficiently.",
+            "dependencies": [],
+            "details": "Set up the API route, configure body parser for file uploads, and ensure it can receive and process incoming CSV files.",
+            "status": "pending"
+          },
+          {
+            "id": 2,
+            "title": "Implement CSV Parsing with Papa Parse Streaming",
+            "description": "Integrate Papa Parse into the API endpoint to efficiently parse the uploaded CSV file. Utilize its streaming capabilities to handle large files without loading the entire content into memory.",
+            "dependencies": [
+              1
+            ],
+            "details": "Configure Papa Parse for streaming, define expected CSV headers, and set up event listeners for rows and errors during parsing.",
+            "status": "pending"
+          },
+          {
+            "id": 3,
+            "title": "Develop Robust Data Validation Logic",
+            "description": "Implement comprehensive validation logic for each parsed CSV row. This includes checking for correct CSV structure, required fields, data types, and format constraints for all relevant content attributes.",
+            "dependencies": [
+              2
+            ],
+            "details": "Define validation rules for fields like `post_id`, `title`, `content_body`, `author`, `publish_date`, etc. Handle and log validation errors for individual rows.",
+            "status": "pending"
+          },
+          {
+            "id": 4,
+            "title": "Implement Duplicate Content Detection Logic",
+            "description": "Develop logic to detect duplicate content based on the `post_id` field. Before inserting new data, check if a record with the same `post_id` already exists in the `content` table.",
+            "dependencies": [
+              3
+            ],
+            "details": "Query the database using `post_id` to identify existing records. Decide on a strategy for duplicates (e.g., skip, update, or flag for review).",
+            "status": "pending"
+          },
+          {
+            "id": 5,
+            "title": "Store Parsed Data in Database with Error Handling",
+            "description": "Persist the validated and non-duplicate parsed content data into the `content` table. Update the `processing_status` for each record and implement robust error handling for database operations.",
+            "dependencies": [
+              4
+            ],
+            "details": "Write database insertion/update logic. Implement transaction management if necessary. Handle database connection errors, insertion failures, and update `processing_status` (e.g., 'processed', 'failed', 'duplicate'). Log all errors comprehensively.",
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Gemini AI Content Analysis Integration",
+        "description": "Integrate Gemini AI to process raw content data from the `content` table, extracting insights, calculating performance scores, identifying key themes, and generating recommendations.",
+        "details": "Set up the Gemini AI API client in the Next.js backend. Create a background processing mechanism (e.g., a dedicated API route triggered after upload, or a Supabase function) that fetches new `content` entries with `processing_status='pending'`. For each entry, send the content's description and performance metrics to Gemini AI with specific prompts to generate `ai_insights` (JSONB), `performance_score` (DECIMAL), `key_themes` (TEXT[]), `hook_effectiveness` (DECIMAL), and `recommendations` (TEXT[]). Store these results in the `content_analysis` table and update the `content.processing_status` to 'completed' or 'failed'. Implement retry logic and rate limiting.",
+        "testStrategy": "Upload content and verify that AI analysis is triggered and results are correctly stored in the `content_analysis` table. Evaluate the quality and relevance of AI-generated insights. Test with diverse content types and lengths. Monitor Gemini AI API calls and ensure rate limits are respected.",
+        "priority": "high",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Gemini AI API Client Setup",
+            "description": "Configure the necessary API keys and client libraries for interacting with the Gemini AI API, ensuring secure authentication and initial connectivity.",
+            "dependencies": [],
+            "details": "Obtain Gemini API key, install client library (e.g., Python `google-generativeai`), configure authentication method (e.g., service account, API key).",
+            "status": "pending"
+          },
+          {
+            "id": 2,
+            "title": "Background Processing Mechanism Development",
+            "description": "Design and implement the infrastructure for asynchronous content analysis processing, such as a dedicated API endpoint or a serverless function (e.g., Supabase Function) to handle AI requests.",
+            "dependencies": [],
+            "details": "Choose between a dedicated API route or Supabase Function, define input/output payload, set up queuing if necessary for long-running tasks.",
+            "status": "pending"
+          },
+          {
+            "id": 3,
+            "title": "Gemini AI Prompt Engineering",
+            "description": "Develop and refine the specific prompts that will be sent to Gemini AI to accurately extract desired insights, scores, themes, and actionable recommendations from content, ensuring structured output.",
+            "dependencies": [
+              1
+            ],
+            "details": "Define the required output format (e.g., JSON schema), iterate on prompt wording for clarity and effectiveness, test with sample content to validate extraction accuracy.",
+            "status": "pending"
+          },
+          {
+            "id": 4,
+            "title": "Content Fetching, AI Interaction & Response Parsing",
+            "description": "Implement the core logic to retrieve content from the database, send it to the Gemini AI API using the configured client and crafted prompts, and parse the structured responses received from the AI.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Develop database queries to fetch content, integrate API calls to Gemini within the background processing mechanism, implement robust JSON parsing for AI output.",
+            "status": "pending"
+          },
+          {
+            "id": 5,
+            "title": "AI Results Storage & Status Update",
+            "description": "Implement the database operations to store the parsed AI analysis results into the `content_analysis` table and update the `processing_status` column in the `content` table to reflect completion or failure.",
+            "dependencies": [
+              4
+            ],
+            "details": "Define the schema for the `content_analysis` table, write SQL insert/update statements, handle transactional updates for `content.processing_status`.",
+            "status": "pending"
+          },
+          {
+            "id": 6,
+            "title": "AI API Robustness (Retry & Rate Limiting)",
+            "description": "Implement robust error handling, including retry mechanisms with exponential backoff for transient API failures and rate limiting to prevent exceeding Gemini AI API quotas and ensure stable operation.",
+            "dependencies": [
+              4
+            ],
+            "details": "Integrate retry logic for API calls (e.g., using a library like `tenacity`), implement a rate limiting strategy (e.g., token bucket algorithm) to manage API call frequency, and enhance error logging.",
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Performance Dashboard Frontend",
+        "description": "Develop the frontend user interface for the Performance Dashboard, providing a visual summary of content performance with key metrics, interactive charts, top performers, and detailed post-level analysis.",
+        "details": "Create the `pages/dashboard/index.js` component. Fetch aggregated performance metrics (avg engagement, reach, etc.) from the `content` and `content_analysis` tables. Implement interactive charts and visualizations using a suitable charting library (e.g., Chart.js, Recharts) to display trends and comparisons. Design sections for 'Top Performers' and 'Detailed Post-Level Analysis' that display AI insights. Include functionality to export reports (e.g., CSV, PDF). Ensure a clean, data-focused, and mobile-responsive design.",
+        "testStrategy": "Verify all aggregate metrics and charts display accurately and reflect the underlying data. Test interactivity of charts and filters. Confirm that clicking on a post opens a detailed view with correct AI insights. Test the export functionality. Check responsiveness across different screen sizes.",
+        "priority": "high",
+        "dependencies": [
+          3,
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Dashboard Layout and UI Components",
+            "description": "Create wireframes, mockups, and a design system for the overall dashboard layout, navigation, and individual UI components (e.g., filters, cards, tables).",
+            "dependencies": [],
+            "details": "Focus on user experience (UX) and user interface (UI) principles. Define color schemes, typography, and component states.",
+            "status": "pending"
+          },
+          {
+            "id": 2,
+            "title": "Implement Data Fetching and Aggregation Logic",
+            "description": "Develop the frontend logic to fetch key performance metrics from the backend APIs and perform any necessary client-side aggregation or transformation for display.",
+            "dependencies": [
+              1
+            ],
+            "details": "Define API endpoints, handle authentication, error handling, and data caching strategies. Ensure data structure aligns with UI requirements.",
+            "status": "pending"
+          },
+          {
+            "id": 3,
+            "title": "Develop Interactive Charts and Visualizations",
+            "description": "Integrate a chosen charting library (e.g., D3.js, Chart.js, Recharts) to create interactive visualizations for key metrics, including trends, comparisons, and distributions.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Implement tooltips, drill-down capabilities, and filtering options for charts. Ensure data binding is robust.",
+            "status": "pending"
+          },
+          {
+            "id": 4,
+            "title": "Build 'Top Performers' and 'Detailed Analysis' Sections",
+            "description": "Develop dedicated sections for showcasing 'Top Performers' (e.g., users, campaigns) and providing 'Detailed Post-Level Analysis' with integrated AI-driven insights.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Design specific layouts for these sections, integrate AI insight display, and ensure data accuracy and relevance.",
+            "status": "pending"
+          },
+          {
+            "id": 5,
+            "title": "Implement Report Export and Mobile Responsiveness",
+            "description": "Add functionality to export dashboard data and visualizations into CSV and PDF formats, and ensure the entire dashboard is fully responsive across various devices (desktop, tablet, mobile).",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Research and integrate export libraries. Use responsive design principles (flexbox, grid, media queries) to adapt the layout for different screen sizes and interactions.",
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Trend Data Fetching & Storage",
+        "description": "Implement the automated system to fetch social media trends from various sources (Twitter/X, TikTok, YouTube, Google Trends, Reddit) every 24 hours and store them in the Supabase `trends` table.",
+        "details": "Develop a backend service or Next.js API route that can be scheduled to run every 24 hours. Integrate with available APIs for Twitter/X, TikTok Creative Center, YouTube Data API, Google Trends API, and Reddit API to fetch trending topics, hashtags, and videos. Parse the fetched data and store relevant information (trend_name, platform, fetch_date, status) in the `trends` table. Implement error handling for API failures and ensure data redundancy where possible.",
+        "testStrategy": "Manually trigger the trend fetching process. Verify that trends are successfully retrieved from all specified sources and accurately stored in the `trends` table. Check the `fetch_date` and `platform` fields. Test error handling for cases where an external API is unavailable.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up API Clients and Authentication",
+            "description": "Configure API clients and implement authentication mechanisms for Twitter/X, TikTok, YouTube, Google Trends, and Reddit, including managing API keys and tokens securely.",
+            "dependencies": [],
+            "details": "This involves researching each platform's API documentation, obtaining necessary credentials, and setting up client libraries or direct HTTP request configurations.",
+            "status": "pending"
+          },
+          {
+            "id": 2,
+            "title": "Develop Platform-Specific Data Fetching Functions",
+            "description": "Create individual functions or modules responsible for fetching trend data from each specified platform (Twitter/X, TikTok, YouTube, Google Trends, Reddit) using their respective APIs.",
+            "dependencies": [
+              1
+            ],
+            "details": "Each function should be designed to query the platform's trend endpoints, handle pagination if necessary, and respect rate limits.",
+            "status": "pending"
+          },
+          {
+            "id": 3,
+            "title": "Implement Data Parsing and Normalization",
+            "description": "Develop logic to parse the diverse data structures received from each API and normalize them into a consistent format suitable for storage in the `trends` table.",
+            "dependencies": [
+              2
+            ],
+            "details": "This includes identifying common trend attributes (e.g., keyword, volume, source, timestamp) and mapping platform-specific fields to these standardized attributes.",
+            "status": "pending"
+          },
+          {
+            "id": 4,
+            "title": "Store Fetched and Normalized Data",
+            "description": "Implement the mechanism to insert the normalized trend data into the `trends` table in the database.",
+            "dependencies": [
+              3
+            ],
+            "details": "Ensure data integrity, handle potential duplicates, and optimize for bulk inserts if applicable. This involves defining the schema for the `trends` table if not already done.",
+            "status": "pending"
+          },
+          {
+            "id": 5,
+            "title": "Implement Robust Error Handling and Logging",
+            "description": "Integrate comprehensive error handling for API failures, rate limit breaches, data parsing issues, and database insertion errors, along with a robust logging system.",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Errors should be caught, logged with sufficient detail (e.g., timestamp, error type, affected platform, relevant data snippet), and appropriate fallback or retry mechanisms should be considered.",
+            "status": "pending"
+          },
+          {
+            "id": 6,
+            "title": "Set Up Daily Data Fetching Schedule",
+            "description": "Implement a scheduling mechanism (e.g., cron job, Supabase function, cloud scheduler) to automatically trigger the data fetching, parsing, and storage process daily.",
+            "dependencies": [
+              4,
+              5
+            ],
+            "details": "The scheduler should be configured to run at a specific time each day, ensuring all necessary components (fetching, parsing, storing, error handling) are invoked sequentially.",
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Gemini AI Trend Relevance Scoring",
+        "description": "Utilize Gemini AI to score the relevance of fetched social media trends to Final Round AI's specific audience and brand positioning, storing the reasoning and content angles.",
+        "details": "Extend the trend processing pipeline (or create a new one) to take newly fetched trends. For each trend, send its name and context (e.g., Final Round AI's product vision, target audience) to Gemini AI. Prompt Gemini AI to generate a `relevance_score` (DECIMAL) and a `reasoning` (TEXT) explaining why the trend is relevant or not. Also, prompt for a `content_angle` (TEXT) related to Final Round AI. Store these AI-generated insights back into the `trends` table.",
+        "testStrategy": "Verify that `relevance_score`, `reasoning`, and `content_angle` are generated and stored for each trend. Evaluate the quality and accuracy of the AI's relevance scoring and content angle suggestions. Test with a variety of trends to ensure robust and consistent results.",
+        "priority": "high",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up Gemini AI API Integration",
+            "description": "Establish and configure the necessary API connections and authentication for Gemini AI within the existing trend processing pipeline. This includes installing required libraries, setting up API keys, and ensuring basic connectivity to the Gemini API.",
+            "dependencies": [],
+            "details": "Focus on infrastructure and initial setup for Gemini AI access.",
+            "status": "pending"
+          },
+          {
+            "id": 2,
+            "title": "Develop and Refine Gemini AI Prompts for Trend Scoring",
+            "description": "Design and iterate on precise prompts for Gemini AI to generate `relevance_score` (0-10), `reasoning` for the score, and `content_angle` based on input trend data and brand context. This involves testing different prompt structures to achieve desired output quality and consistency.",
+            "dependencies": [
+              1
+            ],
+            "details": "Focus on prompt engineering and iterative refinement to optimize AI output.",
+            "status": "pending"
+          },
+          {
+            "id": 3,
+            "title": "Implement Logic for AI Data Exchange and Response Parsing",
+            "description": "Develop the application logic to send trend data (including brand context) to the Gemini AI API and parse the returned JSON responses. This involves extracting the `relevance_score`, `reasoning`, and `content_angle` from the AI's output for subsequent processing.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Focus on the code that handles API requests, error handling, and parsing the AI's structured response.",
+            "status": "pending"
+          },
+          {
+            "id": 4,
+            "title": "Persist AI-Generated Trend Insights to Database",
+            "description": "Implement the database operations to store the AI-generated `relevance_score`, `reasoning`, and `content_angle` into the `trends` table. This includes ensuring proper data mapping, schema updates if necessary, and efficient update mechanisms.",
+            "dependencies": [
+              3
+            ],
+            "details": "Focus on database interactions to store the new AI-derived attributes for each trend.",
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "AI-Powered Content Ideation Engine",
+        "description": "Develop the AI-powered engine that generates original content ideas based on trending topics, historical content performance, and Final Round AI's brand guidelines, including hooks and visual style suggestions.",
+        "details": "Create a Next.js API route or background process that leverages both the `trends` data (with relevance scores) and `content_analysis` insights. Use Gemini AI with sophisticated prompts to generate 10+ content ideas for a given trend or based on overall insights. The output should include `title`, `content_outline`, `hooks` (TEXT[]), `hashtags` (TEXT[]), `visual_style` (TEXT), and a `performance_prediction` (JSONB) based on historical data. Store these generated ideas in the `content_ideas` table.",
+        "testStrategy": "Generate content ideas for various trends and verify that all specified fields are populated. Evaluate the creativity, relevance, and actionable nature of the generated ideas. Test the integration of both trend data and historical performance insights into the idea generation process.",
+        "priority": "high",
+        "dependencies": [
+          4,
+          7
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Data Aggregation for AI Ideation",
+            "description": "Implement logic to aggregate relevant data from the 'trends' database (including relevance scores) and 'content_analysis' module. This aggregated data will serve as input for the AI ideation engine.",
+            "dependencies": [],
+            "details": "Gather trending topics, keywords, audience insights, and historical content performance data. Ensure data is pre-processed and formatted appropriately for AI consumption.",
+            "status": "pending"
+          },
+          {
+            "id": 2,
+            "title": "Develop Performance Prediction Logic",
+            "description": "Design and implement the 'performance_prediction' logic based on historical content performance data. This module will provide estimated success metrics for generated content ideas.",
+            "dependencies": [],
+            "details": "Analyze past content engagement, reach, conversions, and other KPIs to build a predictive model. This model's output will be incorporated into the AI-generated content ideas.",
+            "status": "pending"
+          },
+          {
+            "id": 3,
+            "title": "Design Sophisticated Gemini AI Prompts",
+            "description": "Engineer highly sophisticated prompts for the Gemini AI model to generate comprehensive content ideas. Prompts must elicit structured output including title, outline, hooks, hashtags, visual style suggestions, and a performance prediction.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Iterate on prompt design to ensure high-quality, creative, and structured output. Incorporate aggregated data and leverage the performance prediction logic within the prompt structure.",
+            "status": "pending"
+          },
+          {
+            "id": 4,
+            "title": "Implement AI Integration and Output Parsing",
+            "description": "Develop the core logic to send the aggregated data to the Gemini AI model using the designed prompts and parse the structured output received from the AI.",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Handle API calls to the Gemini AI, manage rate limits, and implement robust parsing mechanisms to extract all components of the generated content ideas (title, outline, hooks, hashtags, visual style, performance prediction).",
+            "status": "pending"
+          },
+          {
+            "id": 5,
+            "title": "Store Generated Content Ideas",
+            "description": "Implement the functionality to store the parsed, AI-generated content ideas into the 'content_ideas' database table.",
+            "dependencies": [
+              4
+            ],
+            "details": "Define the schema for the 'content_ideas' table to accommodate all elements of the AI-generated output. Ensure data integrity and efficient storage.",
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Processing Logs & Status Tracking",
+        "description": "Implement a comprehensive logging system using the `processing_logs` table to track the status, input/output data, and errors for all major processing pipelines (content analysis, trend fetching, idea generation).",
+        "details": "Integrate logging into all backend processing functions. For each significant step (e.g., CSV parsing, Gemini AI call, trend API fetch, idea generation), record an entry in the `processing_logs` table. Log `process_type`, `status` ('running', 'completed', 'failed'), `input_data` (JSONB), `output_data` (JSONB), `error_message` (TEXT), `started_at`, and `completed_at`. Develop frontend components to display real-time processing status indicators to users.",
+        "testStrategy": "Trigger various processing pipelines (content upload, trend refresh, idea generation) and verify that corresponding log entries are created and updated correctly in the `processing_logs` table. Simulate errors to ensure error messages are accurately captured. Check that frontend status indicators reflect the backend processing state.",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          3,
+          4,
+          6,
+          7,
+          8
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Processing Logs Database Schema",
+            "description": "Define the structure and data points for the `processing_logs` table, including fields for status, timestamps, input/output references, error messages, and process identifiers.",
+            "dependencies": [],
+            "details": "This involves identifying all necessary data points for comprehensive logging across different processing stages (content analysis, trend fetching, idea generation). Consider fields like `log_id`, `process_name`, `status` (e.g., 'started', 'in_progress', 'completed', 'failed'), `timestamp`, `input_data_ref`, `output_data_ref`, `error_message`, `user_id` (if applicable), `duration`.",
+            "status": "pending"
+          },
+          {
+            "id": 2,
+            "title": "Develop Centralized Logging Utility/Service",
+            "description": "Create a reusable backend utility or service responsible for writing log entries to the designed `processing_logs` table.",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement functions/methods for different log levels (e.g., start_process, update_status, log_error, complete_process) that interact with the database. Ensure it's robust and handles concurrent writes.",
+            "status": "pending"
+          },
+          {
+            "id": 3,
+            "title": "Integrate Logging into Core Processing Pipelines",
+            "description": "Modify existing backend processing pipelines (content analysis, trend fetching, idea generation) to incorporate calls to the centralized logging utility at key stages (start, completion, error, major milestones).",
+            "dependencies": [
+              2
+            ],
+            "details": "For each pipeline, identify critical points to log status, input/output parameters (or references), and capture any errors. This includes ensuring proper error handling and logging of exceptions.",
+            "status": "pending"
+          },
+          {
+            "id": 4,
+            "title": "Develop Frontend Real-time Status Display",
+            "description": "Create frontend components that query the backend to fetch and display real-time processing status indicators to users, based on the `processing_logs` data.",
+            "dependencies": [
+              3
+            ],
+            "details": "Design UI elements (e.g., progress bars, status messages, notification toasts) that reflect the current state of user-initiated or relevant background processes. This may involve developing new API endpoints for frontend consumption.",
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Frontend Routing and Navigation",
+        "description": "Set up the main navigation structure and routing for the Next.js application, connecting all core feature pages (Dashboard, Trends, Content Import) and ensuring a consistent user experience.",
+        "details": "Implement Next.js routing for `pages/dashboard/index.js`, `pages/trends/index.js`, and a dedicated interface for content import (e.g., a page or modal). Create a consistent navigation bar or sidebar component that allows users to easily switch between these sections. Ensure that protected routes are correctly handled by the authentication system, redirecting unauthenticated users to the login page. Adhere to UI/UX considerations for clean design and clear visual hierarchy.",
+        "testStrategy": "Verify that all navigation links function correctly and lead to the intended pages. Test direct URL access to ensure routing works as expected. Confirm that protected routes are inaccessible without authentication. Check the overall consistency and responsiveness of the navigation across different devices.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          5,
+          8
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up Core Next.js Application Routes",
+            "description": "Create the necessary file-based routes in Next.js for the Dashboard, Trends, and Content Import pages. This involves creating the respective page files (e.g., `pages/dashboard.js`, `pages/trends.js`, `pages/content-import.js`) and ensuring they are accessible.",
+            "dependencies": [],
+            "details": "This foundational step establishes the basic URL structure for the application's main sections.",
+            "status": "pending"
+          },
+          {
+            "id": 2,
+            "title": "Implement Global Navigation Bar/Sidebar",
+            "description": "Design and develop a reusable React component for the application's main navigation (either a top bar or sidebar). This component should include links to the Dashboard, Trends, and Content Import pages, ensuring a consistent user experience and proper routing via Next.js Link component.",
+            "dependencies": [
+              1
+            ],
+            "details": "Focus on responsive design and clear navigation paths. The component should be easily integrated into the main layout.",
+            "status": "pending"
+          },
+          {
+            "id": 3,
+            "title": "Integrate Authentication-Based Route Protection",
+            "description": "Implement logic to protect specific routes (e.g., Dashboard, Trends, Content Import) based on the user's authentication status. This includes redirecting unauthenticated users to a login page and authenticated users to the appropriate content, potentially using a higher-order component or middleware.",
+            "dependencies": [
+              1
+            ],
+            "details": "Ensure robust handling of authentication tokens/sessions and smooth redirection without flickering. Consider edge cases like expired tokens.",
+            "status": "pending"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-06-30T09:15:17.101Z",
+      "updated": "2025-06-30T09:24:56.342Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
