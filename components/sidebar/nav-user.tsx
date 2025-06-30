@@ -24,9 +24,13 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function NavUser({
-  user,
+  user: initialUser,
 }: {
   user: {
     name: string;
@@ -35,6 +39,28 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const [user, setUser] = useState(initialUser);
+  const router = useRouter();
+  const supabase = createClient();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        setUser({
+          name: data.user.user_metadata?.display_name || data.user.email || "User",
+          email: data.user.email || "",
+          avatar: data.user.user_metadata?.avatar_url || "/avatars/shadcn.jpg",
+        });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success("Logged out", { duration: 2000 });
+    router.replace("/auth");
+  };
 
   return (
     <SidebarMenu>
@@ -94,7 +120,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOutIcon />
               Log out
             </DropdownMenuItem>

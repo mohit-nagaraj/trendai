@@ -8,7 +8,7 @@ import { Toaster, toast } from "sonner";
 function Loader() {
   return (
     <span className="inline-block align-middle mr-2">
-      <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin block" />
+      <span className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin block" />
     </span>
   );
 }
@@ -23,6 +23,8 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [displayName, setDisplayName] = useState("");
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -39,6 +41,7 @@ export default function AuthPage() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setDisplayName("");
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -60,6 +63,12 @@ export default function AuthPage() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    if (!displayName.trim()) {
+      setError("Display name is required");
+      toast.error("Display name is required", { duration: 2000 });
+      setIsLoading(false);
+      return;
+    }
     if (password !== repeatPassword) {
       setError("Passwords do not match");
       toast.error("Passwords do not match", { duration: 2000 });
@@ -71,12 +80,15 @@ export default function AuthPage() {
         email,
         password,
         options: {
+          data: {
+            display_name: displayName,
+          },
           emailRedirectTo: typeof window !== "undefined" ? `${window.location.origin}/` : "/",
         },
       });
       if (error) throw error;
       toast.success("Sign up successful! Check your email.", { duration: 2000 });
-      setTimeout(() => router.push("/auth/sign-up-success"), 500);
+      setShowEmailConfirmation(true);
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : "An error occurred";
       setError(msg);
@@ -105,69 +117,94 @@ export default function AuthPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="flex flex-col gap-4">
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                className="border rounded px-3 py-2 bg-card text-foreground"
-                autoComplete="email"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                className="border rounded px-3 py-2 bg-card text-foreground"
-                autoComplete={isSignUp ? "new-password" : "current-password"}
-              />
-              {isSignUp && (
+            {showEmailConfirmation ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="12" fill="#22c55e"/>
+                  <path d="M8 12.5l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <div className="mt-4 text-green-600 text-lg font-semibold text-center">
+                  Check your email to confirm your account.
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="flex flex-col gap-4">
                 <input
-                  type="password"
-                  placeholder="Repeat password"
-                  value={repeatPassword}
-                  onChange={e => setRepeatPassword(e.target.value)}
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
                   required
                   className="border rounded px-3 py-2 bg-card text-foreground"
-                  autoComplete="new-password"
+                  autoComplete="email"
                 />
-              )}
-              {error && <div className="text-red-600 text-sm text-center">{error}</div>}
-              <button
-                type="submit"
-                className="bg-primary text-primary-foreground rounded px-4 py-2 font-semibold disabled:opacity-50 flex items-center justify-center"
-                disabled={isLoading}
-              >
-                {isLoading && <Loader />}
-                {isLoading
-                  ? isSignUp
-                    ? "Signing up..."
-                    : "Signing in..."
-                  : isSignUp
-                  ? "Sign up"
-                  : "Sign in"}
-              </button>
-            </form>
-            <div className="mt-4 text-center">
-              {isSignUp ? (
-                <>
-                  Already have an account?{' '}
-                  <button className="underline text-primary" onClick={() => setIsSignUp(false)}>
-                    Sign in
-                  </button>
-                </>
-              ) : (
-                <>
-                  Don&apos;t have an account?{' '}
-                  <button className="underline text-primary" onClick={() => setIsSignUp(true)}>
-                    Sign up
-                  </button>
-                </>
-              )}
-            </div>
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  className="border rounded px-3 py-2 bg-card text-foreground"
+                  autoComplete={isSignUp ? "new-password" : "current-password"}
+                />
+                {isSignUp && (
+                  <>
+                    <input
+                      type="password"
+                      placeholder="Repeat password"
+                      value={repeatPassword}
+                      onChange={e => setRepeatPassword(e.target.value)}
+                      required
+                      className="border rounded px-3 py-2 bg-card text-foreground"
+                      autoComplete="new-password"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Display name"
+                      value={displayName}
+                      onChange={e => setDisplayName(e.target.value)}
+                      required
+                      className="border rounded px-3 py-2 bg-card text-foreground"
+                      autoComplete="name"
+                    />
+                  </>
+                )}
+                {error && <div className="text-red-600 text-sm text-center">{error}</div>}
+                <button
+                  type="submit"
+                  className="bg-primary text-primary-foreground rounded px-4 py-2 font-semibold disabled:opacity-50 flex items-center justify-center"
+                  disabled={isLoading}
+                >
+                  {isLoading && <Loader />}
+                  {isLoading
+                    ? isSignUp
+                      ? "Signing up..."
+                      : "Signing in..."
+                    : isSignUp
+                      ? "Sign up"
+                      : "Sign in"}
+                </button>
+              </form>
+            )}
+            {!showEmailConfirmation && (
+              <div className="mt-4 text-center">
+                {isSignUp ? (
+                  <>
+                    Already have an account?{' '}
+                    <button className="underline text-primary" onClick={() => setIsSignUp(false)}>
+                      Sign in
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    Don&apos;t have an account?{' '}
+                    <button className="underline text-primary" onClick={() => setIsSignUp(true)}>
+                      Sign up
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
