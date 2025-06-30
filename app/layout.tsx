@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat, Merriweather } from "next/font/google";
 import "./globals.css";
+import { CommandPalette } from "@/components/ui/command-palette";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${montserrat.variable} ${merriweather.variable}`}>
       <body>
+        <CommandPalette />
         {children}
       </body>
     </html>

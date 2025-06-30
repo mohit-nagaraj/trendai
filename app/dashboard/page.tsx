@@ -8,7 +8,7 @@ import { ChartAreaInteractive } from "@/components/visuals/chart-area-interactiv
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import data from "@/data.json";
 
-export default function Page() {
+export default function DashboardPage() {
   return (
     <SidebarProvider>
       <AppSidebar variant="inset" />
@@ -36,4 +36,4 @@ export default function Page() {
       </SidebarInset>
     </SidebarProvider>
   );
-}
+} 

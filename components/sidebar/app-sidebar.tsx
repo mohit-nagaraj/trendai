@@ -3,19 +3,17 @@ import * as React from "react";
 import Image from "next/image";
 import {
   BarChartIcon,
-  CameraIcon,
   ClipboardListIcon,
   DatabaseIcon,
-  FileCodeIcon,
-  FileTextIcon,
   FolderIcon,
   HelpCircleIcon,
   LayoutDashboardIcon,
   ListIcon,
   SearchIcon,
-  SettingsIcon,
   UsersIcon,
 } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 import { NavDocuments } from "@/components/sidebar/nav-documents";
 import { NavMain } from "@/components/sidebar/nav-main";
@@ -29,7 +27,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarGroup,
+  SidebarGroupLabel,
 } from "@/components/ui/sidebar";
+import Link from "next/link";
 
 const data = {
   user: {
@@ -40,87 +41,36 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: LayoutDashboardIcon,
     },
     {
       title: "AI Analysis",
-      url: "#",
+      url: "/ai-analysis",
       icon: ListIcon,
     },
     {
       title: "AI Trends",
-      url: "#",
+      url: "/ai-trends",
       icon: BarChartIcon,
     },
+  ],
+  collaboration: [
     {
       title: "Videos",
-      url: "#",
+      url: "/videos",
       icon: FolderIcon,
     },
     {
       title: "Team",
-      url: "#",
+      url: "/team",
       icon: UsersIcon,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: CameraIcon,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: FileTextIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: FileCodeIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
     },
   ],
   navSecondary: [
     {
-      title: "Settings",
-      url: "#",
-      icon: SettingsIcon,
-    },
-    {
       title: "Get Help",
-      url: "#",
+      url: "https://www.finalroundai.com/frequently-asked-questions",
       icon: HelpCircleIcon,
     },
     {
@@ -132,18 +82,20 @@ const data = {
   documents: [
     {
       name: "File Uploads",
-      url: "#",
+      url: "/file-uploads",
       icon: DatabaseIcon,
     },
     {
       name: "Reports",
-      url: "#",
+      url: "/reports",
       icon: ClipboardListIcon,
     },
   ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname();
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -151,9 +103,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              className="data-[slot=sidebar-menu-button]:!p-1.5 hover:bg-transparent focus:bg-transparent active:bg-transparent hover:text-inherit focus:text-inherit active:text-inherit"
             >
-              <a href="#" className="pb-2">
+              <Link href="/" className="pb-2">
                 <Image
                   src="/Final Round AI.svg"
                   alt="Final Round AI"
@@ -161,13 +113,35 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   height={20}
                   className="mb-[2px] ml-1"
                 />
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden mt-2">
+          <SidebarGroupLabel>Collaboration</SidebarGroupLabel>
+          <SidebarMenu>
+            {data.collaboration.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  tooltip={item.title}
+                  className={cn(
+                    pathname === item.url &&
+                      "bg-secondary text-secondary-foreground"
+                  )}
+                >
+                  <a href={item.url}>
+                    {item.icon && <item.icon />}
+                    <span>{item.title}</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
         <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
