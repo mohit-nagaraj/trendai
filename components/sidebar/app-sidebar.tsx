@@ -1,13 +1,12 @@
 "use client";
 import * as React from "react";
+import Image from "next/image";
 import {
-  ArrowUpCircleIcon,
   BarChartIcon,
   CameraIcon,
   ClipboardListIcon,
   DatabaseIcon,
   FileCodeIcon,
-  FileIcon,
   FileTextIcon,
   FolderIcon,
   HelpCircleIcon,
@@ -45,17 +44,17 @@ const data = {
       icon: LayoutDashboardIcon,
     },
     {
-      title: "Lifecycle",
+      title: "AI Analysis",
       url: "#",
       icon: ListIcon,
     },
     {
-      title: "Analytics",
+      title: "AI Trends",
       url: "#",
       icon: BarChartIcon,
     },
     {
-      title: "Projects",
+      title: "Videos",
       url: "#",
       icon: FolderIcon,
     },
@@ -132,7 +131,7 @@ const data = {
   ],
   documents: [
     {
-      name: "Data Library",
+      name: "File Uploads",
       url: "#",
       icon: DatabaseIcon,
     },
@@ -140,11 +139,6 @@ const data = {
       name: "Reports",
       url: "#",
       icon: ClipboardListIcon,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: FileIcon,
     },
   ],
 };
@@ -159,9 +153,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
-                <ArrowUpCircleIcon className="h-5 w-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+              <a href="#" className="pb-2">
+                <Image
+                  src="/Final Round AI.svg"
+                  alt="Final Round AI"
+                  width={126}
+                  height={20}
+                  className="mb-[2px] ml-1"
+                />
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
