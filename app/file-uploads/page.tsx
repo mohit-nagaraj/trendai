@@ -93,7 +93,6 @@ export default function FileUploadsPage() {
                 <table className="min-w-full border text-sm">
                   <thead>
                     <tr className="bg-muted">
-                      <th className="px-3 py-2 text-left">File</th>
                       <th className="px-3 py-2 text-left">File Name</th>
                       <th className="px-3 py-2 text-left">Upload Time</th>
                       <th className="px-3 py-2 text-left">Actions</th>
@@ -111,10 +110,8 @@ export default function FileUploadsPage() {
                     ) : (
                       files.map((file) => (
                         <tr key={file.id || file.name}>
-                          <td className="px-3 py-2">
-                            <FileTextIcon className="w-5 h-5 text-muted-foreground" />
-                          </td>
-                          <td className="px-3 py-2">{getFileName(file)}</td>
+                         
+                          <td className="px-3 py-2 flex items-center gap-2"><FileTextIcon className="w-5 h-5 text-muted-foreground" />{getFileName(file)}</td>
                           <td className="px-3 py-2">
                             {file.created_at
                               ? new Date(file.created_at).toLocaleString()
