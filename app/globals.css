@@ -102,9 +102,9 @@
   --sidebar-border: oklch(0.9296 0.0370 38.6868);
   --sidebar-ring: oklch(0.7357 0.1641 34.7091);
   --destructive-foreground: oklch(1.0000 0 0);
-  --font-sans: Montserrat, sans-serif;
-  --font-serif: Merriweather, serif;
-  --font-mono: Ubuntu Mono, monospace;
+  --font-sans: 'Montserrat', Arial, Helvetica, sans-serif;
+  --font-serif: 'Merriweather', Georgia, 'Times New Roman', serif;
+  --font-mono: 'System', 'Menlo', 'Monaco', 'Consolas', monospace;
   --shadow-color: hsl(0 0% 0%);
   --shadow-opacity: 0.09;
   --shadow-blur: 12px;
@@ -186,5 +186,6 @@
   body {
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
+    font-family: "Montserrat", system-ui, -apple-system;
   }
 }
