@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { UploadIcon, FileTextIcon, FileSpreadsheet, CloudUpload } from "lucide-react";
 import React, { useRef, useState } from "react";
+import { toast } from 'sonner';
 
 export default function Page() {
   const [dragActive, setDragActive] = useState(false);
@@ -83,6 +84,12 @@ export default function Page() {
       } else {
         setSuccess("File uploaded successfully!");
         setSelectedFile(null);
+        if (inputRef.current) inputRef.current.value = "";
+        // Show processing queued toast if status is processing_queued
+        toast.warning("Processing is queued", {
+          description: "Check back after a while",
+        });
+        console.log("Processing is queued");
         // Optionally: trigger a refresh of uploaded files list elsewhere
       }
     } catch {

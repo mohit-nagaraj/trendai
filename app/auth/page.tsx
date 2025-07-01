@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/utils/supabase/client";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 
 function Loader() {
   return (
@@ -108,7 +108,6 @@ export default function AuthPage() {
 
   return (
     <>
-      <Toaster position="top-center" richColors />
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="w-full max-w-md mx-auto">
           <CardHeader>

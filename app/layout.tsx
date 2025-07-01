@@ -3,6 +3,7 @@ import { Montserrat, Merriweather } from "next/font/google";
 import "./globals.css";
 import { CommandPalette } from "@/components/ui/command-palette";
 import { CommandPaletteProvider } from "@/context/CommandPaletteContext";
+import { Toaster } from "sonner";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body>
         <CommandPaletteProvider>
           <CommandPalette />
+          <Toaster position="top-right" richColors />
           {children}
         </CommandPaletteProvider>
       </body>
