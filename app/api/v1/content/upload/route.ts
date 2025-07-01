@@ -68,6 +68,17 @@ export async function POST(req: Request) {
                     skipped++;
                     continue;
                 }
+                // Calculate metrics
+                const likes = Number(row['Likes']) || 0;
+                const comments = Number(row['Comments']) || 0;
+                const shares = Number(row['Shares']) || 0;
+                const saves = Number(row['Saves']) || 0;
+                const reach = Number(row['Reach']) || 0;
+
+                const engagement_rate = reach > 0 ? ((likes + comments + shares + saves) / reach) * 100 : 0;
+                const viral_coefficient = reach > 0 ? shares / reach : 0;
+                const performance_score = 0.4 * engagement_rate + 0.6 * viral_coefficient * 100; // Example formula
+
                 // Map CSV fields to DB columns (adjust as needed)
                 const mapped = {
                     post_id: postId,
@@ -79,15 +90,19 @@ export async function POST(req: Request) {
                     publish_time: row['Publish time'] ? new Date(row['Publish time']) : null,
                     permalink: row['Permalink'],
                     post_type: row['Post type'],
-                    data_comment: row['Data comment'],
+                    data_comment: 'Imported for Q2 Analysis', // Hardcoded
                     date_field: row['Date'],
                     views: Number(row['Views']) || 0,
-                    reach: Number(row['Reach']) || 0,
-                    likes: Number(row['Likes']) || 0,
-                    shares: Number(row['Shares']) || 0,
+                    reach,
+                    likes,
+                    shares,
                     follows: Number(row['Follows']) || 0,
-                    comments: Number(row['Comments']) || 0,
-                    saves: Number(row['Saves']) || 0,
+                    comments,
+                    saves,
+                    // New calculated fields
+                    engagement_rate: Number(engagement_rate.toFixed(2)),
+                    viral_coefficient: Number(viral_coefficient.toFixed(2)),
+                    performance_score: Number(performance_score.toFixed(2)),
                 };
                 try {
                     console.log(`[DB INSERT] processId=${processId} - Inserting post_id=${postId}`);

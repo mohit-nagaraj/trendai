@@ -87,7 +87,7 @@ export default function Page() {
         if (inputRef.current) inputRef.current.value = "";
         // Show processing queued toast if status is processing_queued
         toast.warning("Processing is queued", {
-          description: "Check back after a while",
+          description: "Check the dashboard page after a while",
         });
         console.log("Processing is queued");
         // Optionally: trigger a refresh of uploaded files list elsewhere

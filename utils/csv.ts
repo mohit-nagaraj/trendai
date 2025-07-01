@@ -9,6 +9,7 @@ import { parse } from 'csv-parse/sync';
  */
 export function parseCsvToObjects(input: string | Buffer): Record<string, any>[] {
   try {
+    console.log("trying main methhod");
     return parse(input, {
       columns: true, // Use first row as header
       skip_empty_lines: true,
@@ -16,6 +17,7 @@ export function parseCsvToObjects(input: string | Buffer): Record<string, any>[]
       bom: true,
     });
   } catch (e) {
+    console.log("trying fallback method");
     // Fallback: try to parse line by line, skipping bad lines
     const lines = input.toString().split(/\r?\n/);
     const [headerLine, ...dataLines] = lines;
