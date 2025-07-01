@@ -22,8 +22,9 @@ export default function VideosPage() {
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  const totalPages = Math.ceil(videoUrls.length / VIDEOS_PER_PAGE);
-  const paginatedVideos = videoUrls.slice((page - 1) * VIDEOS_PER_PAGE, page * VIDEOS_PER_PAGE);
+  const filteredVideoUrls = videoUrls.filter(url => !url.includes('.emptyFolderPlaceholder'));
+  const totalPages = Math.ceil(filteredVideoUrls.length / VIDEOS_PER_PAGE);
+  const paginatedVideos = filteredVideoUrls.slice((page - 1) * VIDEOS_PER_PAGE, page * VIDEOS_PER_PAGE);
 
   const handleOpen = (url: string) => {
     setActiveVideo(url);
@@ -44,7 +45,7 @@ export default function VideosPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {videoUrls.length === 0 ? (
+              {filteredVideoUrls.length === 0 ? (
                 <div className="flex items-center justify-center text-muted-foreground py-24">
                   <VideoIcon className="mr-2 h-8 w-8" />
                   <p className="text-lg">Your video library is empty.</p>

@@ -12,6 +12,7 @@ export default function Page() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isCsvFile = (file: File) => file.name.toLowerCase().endsWith('.csv');
@@ -35,9 +36,11 @@ export default function Page() {
       if (isCsvFile(file)) {
         setSelectedFile(file);
         setError(null);
+        setSuccess(null);
       } else {
         setSelectedFile(null);
         setError("Only .csv files are accepted. Please select a valid CSV file.");
+        setSuccess(null);
       }
     }
   };
@@ -48,9 +51,11 @@ export default function Page() {
       if (isCsvFile(file)) {
         setSelectedFile(file);
         setError(null);
+        setSuccess(null);
       } else {
         setSelectedFile(null);
         setError("Only .csv files are accepted. Please select a valid CSV file.");
+        setSuccess(null);
       }
     }
   };
@@ -59,13 +64,33 @@ export default function Page() {
     inputRef.current?.click();
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
+    if (!selectedFile) return;
     setIsUploading(true);
-    // Simulate upload delay
-    setTimeout(() => {
+    setError(null);
+    setSuccess(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      const res = await fetch("/api/v1/content/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Upload failed. Please try again.");
+        setSuccess(null);
+      } else {
+        setSuccess("File uploaded successfully!");
+        setSelectedFile(null);
+        // Optionally: trigger a refresh of uploaded files list elsewhere
+      }
+    } catch {
+      setError("An error occurred during upload. Please try again.");
+      setSuccess(null);
+    } finally {
       setIsUploading(false);
-      // Optionally clear file or show success
-    }, 2000);
+    }
   };
 
   return (
@@ -135,6 +160,11 @@ export default function Page() {
                 {error && (
                   <div className="mt-4 text-red-600 font-medium">
                     {error}
+                  </div>
+                )}
+                {success && (
+                  <div className="mt-4 text-green-600 font-medium">
+                    {success}
                   </div>
                 )}
               </div>

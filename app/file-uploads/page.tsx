@@ -12,8 +12,22 @@ const BUCKET = "final-round-ai-files";
 const FOLDER = "uploads";
 const PAGE_SIZE = 10;
 
+// Define a type for Supabase Storage file items
+interface FileItem {
+  id?: string;
+  name: string;
+  path?: string;
+  created_at?: string;
+  updated_at?: string;
+  last_accessed_at?: string;
+  lastModified?: string;
+  size?: number;
+  mimetype?: string;
+  metadata?: Record<string, unknown>;
+}
+
 export default function FileUploadsPage() {
-  const [files, setFiles] = useState<any[]>([]);
+  const [files, setFiles] = useState<FileItem[]>([]);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -27,46 +41,42 @@ export default function FileUploadsPage() {
 
   async function fetchFiles() {
     setLoading(true);
-    // List files in the uploads folder, sorted by created_at descending
     const from = (page - 1) * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
 
-    // Supabase Storage API: list returns up to 100 files, so we fetch all and paginate client-side if needed
-    const { data, error } = await supabase.storage.from(BUCKET).list(FOLDER, {
-      limit: 100, // fetch up to 100, adjust if you expect more
+    const { data, error: _error } = await supabase.storage.from(BUCKET).list(FOLDER, {
+      limit: 100,
       offset: 0,
       sortBy: { column: "created_at", order: "desc" }
     });
-    console.log("supabase data",data);
+    console.log("supabase data", data);
 
-    if (error) {
+    if (_error) {
       setFiles([]);
       setTotalCount(0);
       setLoading(false);
       return;
     }
 
-    // Sort by created_at descending (in case API doesn't sort)
-    const sorted = (data ?? []).sort((a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    const filtered = (data ?? []).filter((file: FileItem) => file.name !== ".emptyFolderPlaceholder");
+    const sorted = filtered.sort((a, b) =>
+      new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime()
     );
     setTotalCount(sorted.length);
     setFiles(sorted.slice(from, to + 1));
     setLoading(false);
   }
 
-  async function handleDownload(file: any) {
-    // Generate a signed URL for download
-    const { data, error } = await supabase.storage
+  async function handleDownload(file: FileItem) {
+    const { data } = await supabase.storage
       .from(BUCKET)
-      .createSignedUrl(`${FOLDER}/${file.name}`, 60); // 60 seconds
+      .createSignedUrl(`${FOLDER}/${file.name}`, 60);
     if (data?.signedUrl) {
       window.open(data.signedUrl, "_blank");
     }
   }
 
-  function getFileName(file: any) {
-    // Use file.name or extract from file.path if needed
+  function getFileName(file: FileItem) {
     if (file.name) return file.name;
     if (file.path) {
       const match = file.path.match(/([^/]+)$/);
