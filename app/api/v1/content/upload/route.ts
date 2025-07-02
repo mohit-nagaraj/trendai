@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import { processInstagramCsv } from '@/lib/ingest/instagram';
 import { processTiktokCsv } from '@/lib/ingest/tiktok';
 import { analysisQueue } from '@/lib/queue/analysis-queue';
+import { generateAnalyticsCards } from '@/lib/analytics/cards-generator';
 
 const BUCKET = 'final-round-ai-files';
 const FOLDER = 'uploads';
@@ -109,14 +110,42 @@ export async function POST(req: Request) {
                 stats = await processTiktokCsv(csvString, processId);
             }
             console.log(`[PROCESSING COMPLETE] processId=${processId} -`, stats);
-            // Trigger AI analysis for processed posts using direct function call
+            
+            // Generate analytics cards if we have processed posts
             if (stats && stats.processedIds && stats.processedIds.length > 0) {
                 try {
-                    const result = await queueAnalysisJobs(stats.processedIds);
-                    console.log(`[ANALYSIS QUEUE] processId=${processId} -`, result);
-                } catch (analyzeErr) {
-                    console.error(`[ANALYSIS QUEUE ERROR] processId=${processId} -`, analyzeErr);
+                    console.log(`[ANALYTICS START] processId=${processId} - Generating cards for ${stats.processedIds.length} posts`);
+                    const analyticsCards = await generateAnalyticsCards();
+                    console.log(`[ANALYTICS COMPLETE] processId=${processId} -`, analyticsCards);
+                    
+                    // Store analytics in cache table for frontend retrieval
+                    const analyticsData = {
+                        cards_data: analyticsCards,
+                        generated_at: new Date().toISOString(),
+                        post_count: stats.processedIds.length,
+                        source: source as string
+                    };
+                    
+                    // Store in analytics_cache table
+                    const { error: analyticsError } = await supabaseBg
+                        .from('analytics_cache')
+                        .insert([analyticsData]);
+                    
+                    if (analyticsError) {
+                        console.warn(`[ANALYTICS CACHE WARNING] processId=${processId} -`, analyticsError.message);
+                    }
+                    
+                } catch (analyticsErr) {
+                    console.error(`[ANALYTICS ERROR] processId=${processId} -`, analyticsErr);
                 }
+                
+                    try {
+                        const result = await queueAnalysisJobs(stats.processedIds);
+                        console.log(`[ANALYSIS QUEUE] processId=${processId} -`, result);
+                    } catch (analyzeErr) {
+                        console.error(`[ANALYSIS QUEUE ERROR] processId=${processId} -`, analyzeErr);
+                    }
+
             }
         } catch (err) {
             console.error(`[PROCESSING FAILED] processId=${processId} -`, err);
