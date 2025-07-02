@@ -50,11 +50,11 @@ class AnalysisQueue {
   }
 
   private async processJob(job: QueueJob): Promise<void> {
-    const { createClient } = await import("@/utils/supabase/server");
+    const { createServiceClient } = await import("@/utils/supabase/service");
     try {
       console.log(`Processing job ${job.id} for content ${job.contentId}`);
       job.attempts++;
-      const supabase = await createClient();
+      const supabase = createServiceClient();
       // Update processing status
       await supabase
         .from("content_posts")
@@ -108,8 +108,8 @@ class AnalysisQueue {
       console.log(`Job ${job.id} completed successfully in ${processingTime}ms`);
     } catch (error) {
       console.error(`Job ${job.id} failed (attempt ${job.attempts}):`, error);
-      const { createClient } = await import("@/utils/supabase/server");
-      const supabase = await createClient();
+      const { createServiceClient } = await import("@/utils/supabase/service");
+      const supabase = createServiceClient();
       if (job.attempts >= job.maxAttempts) {
         // Mark as failed after max retries
         await supabase

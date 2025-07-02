@@ -2,9 +2,50 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { processInstagramCsv } from '@/lib/ingest/instagram';
 import { processTiktokCsv } from '@/lib/ingest/tiktok';
+import { analysisQueue } from '@/lib/queue/analysis-queue';
 
 const BUCKET = 'final-round-ai-files';
 const FOLDER = 'uploads';
+
+// Extracted analysis queue logic for reuse
+async function queueAnalysisJobs(contentIds: string[], priority = 1) {
+    const supabase = await createClient();
+    // Validate content posts exist and are not already processed
+    const { data: contentPosts, error } = await supabase
+        .from('content_posts')
+        .select('id, processing_status, ai_analysis_complete, post_link')
+        .in('id', contentIds);
+    if (error) {
+        throw new Error(`Failed to fetch content posts: ${error.message}`);
+    }
+    const validPosts = contentPosts?.filter(
+        post => !post.ai_analysis_complete && post.processing_status !== 'processing'
+    ) || [];
+    if (validPosts.length === 0) {
+        return { message: 'No valid posts to analyze', validPosts: 0 };
+    }
+    // Separate posts with and without media
+    const postsWithMedia = validPosts.filter(post => post.post_link);
+    const postsWithoutMedia = validPosts.filter(post => !post.post_link);
+    // Add jobs to queue (higher priority for posts with media)
+    const jobIds = [
+        ...postsWithMedia.map(post => analysisQueue.addJob(post.id, priority + 1)),
+        ...postsWithoutMedia.map(post => analysisQueue.addJob(post.id, priority)),
+    ];
+    // Update status to queued
+    await supabase
+        .from('content_posts')
+        .update({ processing_status: 'pending' })
+        .in('id', validPosts.map(p => p.id));
+    return {
+        message: 'Analysis jobs queued successfully',
+        jobIds,
+        totalJobs: jobIds.length,
+        postsWithMedia: postsWithMedia.length,
+        postsWithoutMedia: postsWithoutMedia.length,
+        queueStatus: analysisQueue.getQueueStatus(),
+    };
+}
 
 export async function POST(req: Request) {
     // Parse form data
@@ -68,18 +109,10 @@ export async function POST(req: Request) {
                 stats = await processTiktokCsv(csvString, processId);
             }
             console.log(`[PROCESSING COMPLETE] processId=${processId} -`, stats);
-            // Trigger AI analysis for processed posts
+            // Trigger AI analysis for processed posts using direct function call
             if (stats && stats.processedIds && stats.processedIds.length > 0) {
                 try {
-                    const res = await fetch(
-                        `${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/v1/content/analyze`,
-                        {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ contentIds: stats.processedIds })
-                        }
-                    );
-                    const result = await res.json();
+                    const result = await queueAnalysisJobs(stats.processedIds);
                     console.log(`[ANALYSIS QUEUE] processId=${processId} -`, result);
                 } catch (analyzeErr) {
                     console.error(`[ANALYSIS QUEUE ERROR] processId=${processId} -`, analyzeErr);

@@ -36,6 +36,7 @@
     "cmdk": "^1.1.1",
     "csv-parse": "^5.6.0",
     "date-fns": "^4.1.0",
+    "fs.promises": "^0.1.2",
     "lucide-react": "^0.525.0",
     "next": "15.3.4",
     "react": "^19.0.0",
@@ -45,6 +46,7 @@
     "recharts": "^3.0.2",
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.1",
+    "tmp-promise": "^3.0.3",
     "zod": "^3.25.67"
   },
   "devDependencies": {

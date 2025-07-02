@@ -106,6 +106,7 @@ Focus on actionable insights for improving future content performance, consideri
 }
 
 async function downloadMediaFromSupabase(url: string): Promise<{ buffer: Buffer; mimeType: string }> {
+  console.log(`[Gemini] Downloading media from Supabase: ${url}`);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to download media: ${response.statusText}`);
@@ -119,6 +120,7 @@ async function downloadMediaFromSupabase(url: string): Promise<{ buffer: Buffer;
     mp4: 'video/mp4', mov: 'video/quicktime', avi: 'video/x-msvideo', mkv: 'video/x-matroska', webm: 'video/webm'
   };
   const mimeType = mimeTypes[ext || ''] || 'application/octet-stream';
+  console.log(`[Gemini] Downloaded media (${buffer.length} bytes, mimeType: ${mimeType})`);
   return { buffer, mimeType };
 }
 
@@ -130,7 +132,7 @@ export async function analyzeContentWithGemini(contentPost: ContentPost): Promis
   if (contentPost.post_link) {
     const { buffer, mimeType } = await downloadMediaFromSupabase(contentPost.post_link);
     if (buffer.length < 20 * 1024 * 1024) {
-      // Inline for small files
+      console.log(`[Gemini] Using inlineData for media (<20MB)`);
       contents = [
         {
           inlineData: {
@@ -141,11 +143,10 @@ export async function analyzeContentWithGemini(contentPost: ContentPost): Promis
         { text: prompt },
       ];
     } else {
-      // Use Gemini File API for large files
+      console.log(`[Gemini] Using File API for media (>20MB)`);
       // @ts-expect-error: No types for tmp-promise
       const tmp = await import('tmp-promise');
       const fs = await import('fs/promises');
-      // Ensure postfix is always a string
       let ext = 'bin';
       if (mimeType && mimeType.includes('/')) {
         const split = mimeType.split('/');
@@ -169,6 +170,7 @@ export async function analyzeContentWithGemini(contentPost: ContentPost): Promis
           file: safeTmpPath,
           config: { mimeType: mimeType || 'application/octet-stream' },
         });
+        console.log(`[Gemini] Uploaded file to Gemini File API:`, myfile);
         contents = createUserContent([
           createPartFromUri(String(myfile.uri ?? ''), String(myfile.mimeType ?? '')),
           prompt,
@@ -178,17 +180,24 @@ export async function analyzeContentWithGemini(contentPost: ContentPost): Promis
       }
     }
   } else {
+    console.log(`[Gemini] No media attached, using text-only prompt`);
     contents = [{ text: prompt }];
   }
 
+  console.log(`[Gemini] Sending prompt to Gemini:`, prompt);
   const response = await genAI.models.generateContent({
     model: 'gemini-2.5-pro',
     contents,
   });
+  console.log(`[Gemini] Gemini API response:`, response);
   const text = response?.text;
+  console.log(`[Gemini] Gemini response text:`, text);
   const jsonMatch = text && text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
+    console.error(`[Gemini] No JSON found in Gemini response`);
     throw new Error('No JSON found in Gemini response');
   }
-  return JSON.parse(jsonMatch[0]) as AIAnalysisResult;
+  const parsed = JSON.parse(jsonMatch[0]) as AIAnalysisResult;
+  console.log(`[Gemini] Parsed AIAnalysisResult:`, parsed);
+  return parsed;
 } 
