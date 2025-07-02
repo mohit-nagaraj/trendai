@@ -23,6 +23,7 @@ export async function processTiktokCsv(csvString: string, processId: string) {
   let processed = 0;
   let failed = 0;
   let skipped = 0;
+  const processedIds: string[] = [];
   for (const row of rows) {
     const videoLink = row['Video link'];
     if (!videoLink) {
@@ -39,7 +40,7 @@ export async function processTiktokCsv(csvString: string, processId: string) {
     const performance_score = 0.4 * engagement_rate + 0.6 * viral_coefficient * 100;
     // Extract account_username from videoLink
     let account_username = null;
-    const match = videoLink.match(/tiktok\.com\/\@([^\/]+)/);
+    const match = videoLink.match(/tiktok\.com\/@([^\/]+)/);
     if (match) {
       account_username = match[1];
     }
@@ -118,11 +119,20 @@ export async function processTiktokCsv(csvString: string, processId: string) {
         failed++;
       } else {
         processed++;
+        // Query for the row to get its id
+        const { data: found, error: findError } = await supabaseBg
+          .from('content_posts')
+          .select('id')
+          .eq('post_id', mapped.post_id)
+          .maybeSingle();
+        if (!findError && found && found.id) {
+          processedIds.push(found.id);
+        }
       }
     } catch (rowErr) {
       console.error(`[TIKTOK ROW ERROR] processId=${processId} - videoLink=${videoLink} -`, rowErr);
       failed++;
     }
   }
-  return { processed, failed, skipped };
+  return { processed, failed, skipped, processedIds };
 } 

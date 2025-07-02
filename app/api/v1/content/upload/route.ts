@@ -68,6 +68,23 @@ export async function POST(req: Request) {
                 stats = await processTiktokCsv(csvString, processId);
             }
             console.log(`[PROCESSING COMPLETE] processId=${processId} -`, stats);
+            // Trigger AI analysis for processed posts
+            if (stats && stats.processedIds && stats.processedIds.length > 0) {
+                try {
+                    const res = await fetch(
+                        `${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/v1/content/analyze`,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ contentIds: stats.processedIds })
+                        }
+                    );
+                    const result = await res.json();
+                    console.log(`[ANALYSIS QUEUE] processId=${processId} -`, result);
+                } catch (analyzeErr) {
+                    console.error(`[ANALYSIS QUEUE ERROR] processId=${processId} -`, analyzeErr);
+                }
+            }
         } catch (err) {
             console.error(`[PROCESSING FAILED] processId=${processId} -`, err);
         }

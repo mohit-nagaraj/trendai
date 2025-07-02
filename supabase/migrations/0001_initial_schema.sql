@@ -19,6 +19,7 @@ CREATE TABLE content_posts (
   data_comment TEXT,
   date_field VARCHAR(20), -- 'Lifetime' from CSV
   platform VARCHAR(20) DEFAULT 'instagram',
+  post_link VARCHAR(200), -- Supabase Storage URL
   
   -- Performance Metrics (from CSV)
   views INTEGER DEFAULT 0,

@@ -9,6 +9,7 @@ export async function processInstagramCsv(csvString: string, processId: string) 
   let processed = 0;
   let failed = 0;
   let skipped = 0;
+  const processedIds: string[] = [];
   for (const row of rows) {
     const postId = row['Post ID'];
     if (!postId) {
@@ -99,11 +100,20 @@ export async function processInstagramCsv(csvString: string, processId: string) 
         failed++;
       } else {
         processed++;
+        // Query for the row to get its id
+        const { data: found, error: findError } = await supabaseBg
+          .from('content_posts')
+          .select('id')
+          .eq('post_id', postId)
+          .maybeSingle();
+        if (!findError && found && found.id) {
+          processedIds.push(found.id);
+        }
       }
     } catch (rowErr) {
       console.error(`[ROW ERROR] processId=${processId} - post_id=${postId} -`, rowErr);
       failed++;
     }
   }
-  return { processed, failed, skipped };
+  return { processed, failed, skipped, processedIds };
 } 
