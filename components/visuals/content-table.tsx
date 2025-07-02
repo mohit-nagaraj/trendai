@@ -10,18 +10,10 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarIcon } from "lucide-react";
+import { platformBadge, statusColor } from "@/lib/badge-colors";
 
 const PAGE_SIZE = 20;
 
-function statusColor(status: string) {
-    switch (status) {
-        case "pending": return "bg-yellow-200 text-yellow-800";
-        case "processing": return "bg-blue-200 text-blue-800";
-        case "completed": return "bg-green-200 text-green-800";
-        case "failed": return "bg-red-200 text-red-800";
-        default: return "bg-gray-200 text-gray-800";
-    }
-}
 
 interface ContentPostRow {
     id: string;
@@ -36,16 +28,6 @@ interface ContentPostRow {
 function formatDate(date: Date | null) {
     if (!date) return "";
     return date.toLocaleDateString();
-}
-
-function platformBadge(platform: string) {
-    if (platform === "instagram") {
-        return "border-pink-500 text-pink-600";
-    }
-    if (platform === "tiktok") {
-        return "border-black text-black";
-    }
-    return "border-gray-300 text-gray-600";
 }
 
 export default function ContentTable() {
