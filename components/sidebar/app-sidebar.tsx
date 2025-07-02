@@ -3,7 +3,6 @@ import * as React from "react";
 import Image from "next/image";
 import {
   BarChartIcon,
-  ClipboardListIcon,
   DatabaseIcon,
   FolderIcon,
   HelpCircleIcon,
@@ -51,8 +50,8 @@ const data = {
   ],
   collaboration: [
     {
-      title: "Videos",
-      url: "/videos",
+      title: "Content",
+      url: "/content",
       icon: FolderIcon,
     },
     {

@@ -8,7 +8,7 @@ const ROUTES = [
   { label: "Dashboard", value: "/dashboard" },
   { label: "AI Analysis", value: "/ai-analysis" },
   { label: "AI Trends", value: "/ai-trends" },
-  { label: "Videos", value: "/videos" },
+  { label: "Videos & Images", value: "/content" },
   { label: "Team", value: "/team" },
   { label: "File Uploads", value: "/file-uploads" }
 ];

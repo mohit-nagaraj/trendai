@@ -3,7 +3,7 @@ import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { VideoIcon, ImageIcon } from "lucide-react";
+import { VideoIcon, ImageIcon, LoaderCircle } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import React, { useState, useEffect } from "react";
@@ -73,7 +73,7 @@ export default function VideosPage() {
             <CardContent>
               {loading ? (
                 <div className="flex items-center justify-center text-muted-foreground py-24">
-                  <VideoIcon className="mr-2 h-8 w-8 animate-spin" />
+                  <LoaderCircle className="mr-2 h-8 w-8 animate-spin" />
                   <p className="text-lg">Loading media...</p>
                 </div>
               ) : mediaFiles.length === 0 ? (

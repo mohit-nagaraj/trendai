@@ -100,8 +100,8 @@ export default function ContentTable() {
     }, [page, debouncedSearch, startDate, endDate]);
 
     return (
-        <div className="w-full">
-            <div className="flex items-center justify-between mb-2 gap-2 px-2">
+        <div className="w-full mt-4">
+            <div className="flex items-center justify-between mb-4 gap-2">
                 <Input
                     className="max-w-xs"
                     placeholder="Search by Post ID..."
@@ -162,7 +162,7 @@ export default function ContentTable() {
             </div>
             <div className="overflow-x-auto rounded-lg border bg-background">
                 <Table className="min-w-full text-sm">
-                    <TableHeader>
+                    <TableHeader className="bg-muted">
                         <TableRow>
                             <TableHead className="px-4 py-3">Post ID</TableHead>
                             <TableHead className="px-4 py-3">Username</TableHead>
