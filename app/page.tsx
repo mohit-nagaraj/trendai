@@ -1,12 +1,13 @@
 "use client";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { UploadIcon, FileTextIcon, FileSpreadsheet, CloudUpload } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Page() {
   const [dragActive, setDragActive] = useState(false);
@@ -14,6 +15,7 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
+  const [source, setSource] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isCsvFile = (file: File) => file.name.toLowerCase().endsWith('.csv');
@@ -66,6 +68,10 @@ export default function Page() {
   };
 
   const handleUpload = async () => {
+    if (!source) {
+      toast.error("Please select a source.");
+      return;
+    }
     if (!selectedFile) return;
     setIsUploading(true);
     setError(null);
@@ -73,6 +79,7 @@ export default function Page() {
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
+      formData.append("source", source);
       const res = await fetch("/api/v1/content/upload", {
         method: "POST",
         body: formData,
@@ -85,12 +92,10 @@ export default function Page() {
         setSuccess("File uploaded successfully!");
         setSelectedFile(null);
         if (inputRef.current) inputRef.current.value = "";
-        // Show processing queued toast if status is processing_queued
         toast.warning("Processing is queued", {
           description: "Check the dashboard page after a while",
         });
         console.log("Processing is queued");
-        // Optionally: trigger a refresh of uploaded files list elsewhere
       }
     } catch {
       setError("An error occurred during upload. Please try again.");
@@ -107,18 +112,30 @@ export default function Page() {
         <SiteHeader title="Quick Sync" />
         <main className="p-4 md:p-6 flex-1">
           <Card>
-            <CardHeader className="flex flex-row items-start justify-between">
-              <div>
-                <CardTitle>File Upload</CardTitle>
-                <CardDescription>
-                  Upload your social media data (CSV) for analysis.
-                </CardDescription>
+            <CardHeader className="flex flex-col items-start gap-4">
+              <div className="w-full flex flex-col md:flex-row md:items-center md:gap-4">
+                <div className="flex flex-col md:flex-row md:items-center gap-2 w-full">
+                
+                  <Select
+                    value={source}
+                    onValueChange={setSource}
+                    disabled={isUploading}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select source" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="instagram">Instagram</SelectItem>
+                      <SelectItem value="tiktok">TikTok</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1 flex justify-end mt-2 md:mt-0">
+                  <Button className="" variant="default" onClick={handleUpload} disabled={isUploading || !selectedFile}>
+                    Upload <CloudUpload className="ml-2 cursor-pointer h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              {selectedFile && (
-                <Button className="ml-4 mt-1" variant="default" onClick={handleUpload} disabled={isUploading}>
-                  Upload <CloudUpload className="ml-2 cursor-pointer h-4 w-4" />
-                </Button>
-              )}
             </CardHeader>
             <CardContent>
               <div
