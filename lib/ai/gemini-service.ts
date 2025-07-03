@@ -244,14 +244,14 @@ const careerKeywords = [
  * Returns the inspiration array.
  */
 export async function getContentInspirationFromTrends(): Promise<Inspiration[]> {
-  const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_FREE! });
+  const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_VIDEO! });
   const groundingTool = { googleSearch: {} };
   const config = { tools: [groundingTool] };
   const brandContext = `\nBRAND CONTEXT:\nFinal Round AI is an AI‑powered interview coach and career accelerator that guides candidates through every stage—from resume creation to live interview simulations and post‑session feedback. Serving over 300,000+ offers and 1.2M+ interviews, the brand offers tools like:\n- Interview Copilot: a real‑time assistant during live and mock interviews, offering question prompts, structured frameworks, code guidance, and soft‑skill cues.\n- AI Resume & Cover Letter Builder: ATS‑optimized materials personalized to users' experience and roles.\n- Mock Interviews & Question Bank: industry‑specific practice with customizable Q&A and performance analytics\n- Coding Copilot: live coding help during technical interviews (debugging, pattern hints)\n- Post‑Interview Reports: evaluation of strengths, areas to improve, confidence metrics, and sentiment breakdown\nTarget audience: Early to mid‑career tech professionals—software engineers, data scientists, product managers, and tech-savvy career changers—especially those preparing for high‑stakes interviews at top companies.\nBrand personality: Professional, empowering, and tech‑driven—balancing polished, ATS‑grade visuals and UI with trustworthy support. It positions itself as both a mentor and a stealthy backstage coach, blending human mentorship with AI efficiency.\n`;
   const prompt = `You are an expert content strategist for Final Round AI (an interview coaching platform).\n\nUsing real-time web search (Google Search grounding), find the latest trends, news, or discussions relevant to the following career topics:\n${careerKeywords.map(k => `- ${k}`).join('\n')}\n\nFor each unique trend or news item you find, provide:\n1. A refined title that's catchy and relevant to Final Round AI\n2. The original title\n3. The primary source (main url) and all sources (array of urls)\n4. A final score (1-100) based on relevance, engagement, and potential for content creation\n5. An enhanced description explaining why this trend matters for job seekers\n6. Relevant keywords\n7. A relevance score (1-100)\n8. Content angle suggestions for Final Round AI (array of 2-4 ideas)\n\n${brandContext}\n\nReturn a JSON array with this structure:\n[\n  {\n    "title": "refined title",\n    "original_title": "original title",\n    "source": "primary source",\n    "sources": ["all sources"],\n    "final_score": 85,\n    "description": "enhanced description",\n    "keywords": ["relevant", "keywords"],\n    "relevance_score": 90,\n    "content_angles": ["angle 1", "angle 2", "angle 3"]\n  }\n]\nIf you cannot find any trends for a topic, skip it. Only include real, recent trends. Return only valid JSON.`;
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-pro",
       contents: prompt,
       config,
     });

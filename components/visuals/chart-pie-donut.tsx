@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { TrendingUp } from "lucide-react"
 import { Label, Pie, PieChart } from "recharts"
 
 import {
@@ -52,20 +51,42 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ChartPieDonut() {
-  const totalVisitors = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.visitors, 0)
-  }, [])
+export function ChartPieDonut({ data, config }: {
+  data?: Array<{ domain: string; value: number; fill: string }>,
+  config?: Record<string, { label: string; color?: string }> & { value: { label: string } }
+}) {
+  const chartDataToUse = data && data.length > 0 ? data : chartData;
+  const chartConfigToUse = config && Object.keys(config).length > 0 ? config : chartConfig;
+  const total = React.useMemo(() => {
+    if (data && data.length > 0) {
+      return data.reduce((acc, curr) => acc + curr.value, 0);
+    }
+    return chartData.reduce((acc, curr) => acc + curr.visitors, 0);
+  }, [data]);
+
+  if (data && data.length === 0) {
+    return (
+      <Card className="flex flex-col h-full">
+        <CardHeader className="items-center pb-0">
+          <CardTitle>Top Sources</CardTitle>
+          <CardDescription>These are the places information was extracted from</CardDescription>
+        </CardHeader>
+        <CardContent className="flex-1 pb-0 flex items-center justify-center">
+          <span className="text-muted-foreground">No source data to display.</span>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="flex flex-col h-full">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Pie Chart - Donut with Text</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardTitle>Top Sources</CardTitle>
+        <CardDescription>These are the places information was extracted from</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
-          config={chartConfig}
+          config={chartConfigToUse}
           className="mx-auto aspect-square max-h-[300px]"
         >
           <PieChart>
@@ -74,9 +95,9 @@ export function ChartPieDonut() {
               content={<ChartTooltipContent hideLabel />}
             />
             <Pie
-              data={chartData}
-              dataKey="visitors"
-              nameKey="browser"
+              data={chartDataToUse}
+              dataKey={data ? "value" : "visitors"}
+              nameKey={data ? "domain" : "browser"}
               innerRadius={60}
               strokeWidth={5}
             >
@@ -95,14 +116,14 @@ export function ChartPieDonut() {
                           y={viewBox.cy}
                           className="fill-foreground text-3xl font-bold"
                         >
-                          {totalVisitors.toLocaleString()}
+                          {total.toLocaleString()}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          Visitors
+                          {data ? "Mentions" : "Visitors"}
                         </tspan>
                       </text>
                     )
@@ -115,10 +136,10 @@ export function ChartPieDonut() {
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+        A site may be over-performant due to its SEO
         </div>
         <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
+        May not be accurate
         </div>
       </CardFooter>
     </Card>
