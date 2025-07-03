@@ -78,8 +78,8 @@ export function SectionCards() {
   }
 
   if (error || !cards) {
-    return (
-      <div className="p-4 text-center text-red-500">{error || "No analytics data available."}</div>
+    return (error != "No analytics available yet" ?
+      <div className="p-4 text-center text-red-500">{error || "No analytics data available."}</div> : null
     )
   }
 

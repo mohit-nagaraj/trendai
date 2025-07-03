@@ -105,7 +105,7 @@ export function ChartAreaInteractive() {
     return <Card className="h-[350px] flex items-center justify-center text-red-500">{error}</Card>;
   }
   if (!filteredData.length) {
-    return <Card className="h-[350px] flex items-center justify-center text-muted-foreground">No chart data available.</Card>;
+    return null;
   }
 
   return (
@@ -223,14 +223,12 @@ export function ChartAreaInteractive() {
               type="natural"
               fill="url(#fillMobile)"
               stroke="var(--color-tiktok)"
-              stackId="a"
             />
             <Area
               dataKey="instagram"
               type="natural"
               fill="url(#fillDesktop)"
               stroke="var(--color-instagram)"
-              stackId="a"
             />
           </AreaChart>
         </ChartContainer>

@@ -144,6 +144,7 @@ export async function generateAnalyticsCards(): Promise<AnalyticsCardsResponse> 
 
     // Delete all previous data
     await supabase.from('analytics_chart_data').delete().neq('date', '');
+    console.log("Deleted all previous datas")
     
     // Insert new data (in batches if needed)
     for (let i = 0; i < chartData.length; i += 500) {
