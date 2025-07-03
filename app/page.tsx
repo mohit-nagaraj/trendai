@@ -131,7 +131,7 @@ export default function Page() {
                   </Select>
                 </div>
                 <div className="flex-1 flex justify-end mt-2 md:mt-0">
-                  <Button className="" variant="default" onClick={handleUpload} disabled={isUploading || !selectedFile}>
+                  <Button className="cursor-pointer" variant="default" onClick={handleUpload} disabled={isUploading || !selectedFile}>
                     Upload <CloudUpload className="ml-2 cursor-pointer h-4 w-4" />
                   </Button>
                 </div>

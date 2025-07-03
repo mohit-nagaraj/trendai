@@ -426,6 +426,14 @@ const DashboardPage: FC = () => {
 
                         </div>
                     </div>
+                    <div className="flex justify-between text-[10px] text-gray-500/80 mt-4">
+                        <span>
+                            Time taken to process: {analysis.processing_time_ms}ms
+                        </span>
+                        <span>
+                            Model used: {analysis.gemini_model_used}
+                        </span>
+                    </div>
                 </div>
             </SidebarInset>
         </SidebarProvider>

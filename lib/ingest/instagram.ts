@@ -32,8 +32,8 @@ export async function processInstagramCsv(csvString: string, processId: string) 
     const reach = parseNumberWithCommas(row['Reach']);
     const views = parseNumberWithCommas(row['Views']);
     const follows = parseNumberWithCommas(row['Follows']);
-    const engagement_rate = reach > 0 ? ((likes + comments + shares + saves) / reach) * 100 : 0;
-    const viral_coefficient = reach > 0 ? shares / reach : 0;
+    const engagement_rate = views > 0 ? ((likes + comments + shares + saves) / views) * 100 : 0;
+    const viral_coefficient = views > 0 ? shares / views : 0;
     const performance_score = 0.4 * engagement_rate + 0.6 * viral_coefficient * 100;
     const permapostlink = row['Permalink'];
     // --- Instagram Media Download & Supabase Upload ---

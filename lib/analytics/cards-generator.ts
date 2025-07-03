@@ -107,45 +107,51 @@ export async function generateAnalyticsCards(): Promise<AnalyticsCardsResponse> 
   const avgERComparison = satisfactionMetric > 50 ? `+${(satisfactionMetric - 50).toFixed(0)}% more ER than avg` : 'Meeting engagement targets';
 
   // --- Chart Data Generation and Storage ---
-  // Group by date and platform, sum reach
+  // Group by date and platform, sum views (not reach)
   const datePlatformMap: Record<string, { instagram?: number, tiktok?: number }> = {};
+
   for (const post of posts) {
-    const date = post.created_at?.slice(0, 10); // YYYY-MM-DD
-    if (!date) continue;
-    if (!datePlatformMap[date]) datePlatformMap[date] = {};
+    // Use publish_time instead of created_at for actual post date
+    const publishTime = post.publish_time || post.created_at;
+    if (!publishTime) continue;
+    
+    const date = new Date(publishTime).toISOString().slice(0, 10); // YYYY-MM-DD
+    
+    if (!datePlatformMap[date]) {
+      datePlatformMap[date] = {};
+    }
+    
+    // Use views instead of reach for chart data
+    const viewCount = post.views || 0;
+    
     if (post.platform === 'instagram') {
-      datePlatformMap[date].instagram = (datePlatformMap[date].instagram || 0) + (post.reach || 0);
+      datePlatformMap[date].instagram = (datePlatformMap[date].instagram || 0) + viewCount;
     } else if (post.platform === 'tiktok') {
-      datePlatformMap[date].tiktok = (datePlatformMap[date].tiktok || 0) + (post.reach || 0);
+      datePlatformMap[date].tiktok = (datePlatformMap[date].tiktok || 0) + viewCount;
     }
   }
-  // Get all dates in range (from min to max date)
-  const allDates = Object.keys(datePlatformMap).sort();
-  if (allDates.length > 0) {
-    const minDate = new Date(allDates[0]);
-    const maxDate = new Date(allDates[allDates.length - 1]);
-    const dateList: string[] = [];
-    for (let d = new Date(minDate); d <= maxDate; d.setDate(d.getDate() + 1)) {
-      dateList.push(d.toISOString().slice(0, 10));
-    }
-    // Build series for each platform
-    const instagramSeries = dateList.map(date => ({ date, value: datePlatformMap[date]?.instagram ?? null }));
-    const tiktokSeries = dateList.map(date => ({ date, value: datePlatformMap[date]?.tiktok ?? null }));
-    const instagramFilled = interpolateSeries(instagramSeries);
-    const tiktokFilled = interpolateSeries(tiktokSeries);
-    // Compose chartData array
-    const chartData = dateList.map((date, i) => ({
+
+  // Get only the dates that have actual data (no interpolation between gaps)
+  const actualDates = Object.keys(datePlatformMap).sort();
+
+  if (actualDates.length > 0) {
+    // Build chart data only for dates with actual posts
+    const chartData = actualDates.map(date => ({
       date,
-      instagram: instagramFilled[i].value,
-      tiktok: tiktokFilled[i].value,
+      instagram: datePlatformMap[date]?.instagram || 0,
+      tiktok: datePlatformMap[date]?.tiktok || 0,
     }));
+
     // Delete all previous data
     await supabase.from('analytics_chart_data').delete().neq('date', '');
+    
     // Insert new data (in batches if needed)
     for (let i = 0; i < chartData.length; i += 500) {
       const batch = chartData.slice(i, i + 500);
       const { error: insertError } = await supabase.from('analytics_chart_data').insert(batch);
-      if (insertError) throw new Error('Failed to insert chart data: ' + insertError.message);
+      if (insertError) {
+        throw new Error('Failed to insert chart data: ' + insertError.message);
+      }
     }
   }
 
@@ -185,46 +191,4 @@ export async function generateAnalyticsCards(): Promise<AnalyticsCardsResponse> 
   };
 }
 
-// Helper: interpolate missing values in a time series
-function interpolateSeries(series: { date: string, value: number|null }[]): { date: string, value: number }[] {
-  // Forward fill, then backward fill, then interpolate
-  // 1. Forward fill
-  let lastValue: number|null = null;
-  for (let i = 0; i < series.length; i++) {
-    if (series[i].value == null && lastValue != null) {
-      series[i].value = lastValue;
-    } else if (series[i].value != null) {
-      lastValue = series[i].value;
-    }
-  }
-  // 2. Backward fill
-  lastValue = null;
-  for (let i = series.length - 1; i >= 0; i--) {
-    if (series[i].value == null && lastValue != null) {
-      series[i].value = lastValue;
-    } else if (series[i].value != null) {
-      lastValue = series[i].value;
-    }
-  }
-  // 3. Interpolate (average of neighbors if still null)
-  for (let i = 0; i < series.length; i++) {
-    if (series[i].value == null) {
-      // Find previous and next non-null
-      let prev = i - 1;
-      while (prev >= 0 && series[prev].value == null) prev--;
-      let next = i + 1;
-      while (next < series.length && series[next].value == null) next++;
-      if (prev >= 0 && next < series.length && series[prev].value != null && series[next].value != null) {
-        series[i].value = Math.round((series[prev].value! + series[next].value!) / 2);
-      } else if (prev >= 0 && series[prev].value != null) {
-        series[i].value = series[prev].value;
-      } else if (next < series.length && series[next].value != null) {
-        series[i].value = series[next].value;
-      } else {
-        series[i].value = 0;
-      }
-    }
-  }
-  // All values are now filled
-  return series as { date: string, value: number }[];
-} 
+ 
