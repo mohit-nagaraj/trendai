@@ -261,7 +261,7 @@ const DashboardPage: FC = () => {
                                 <div className="flex justify-between items-center mb-2">
                                     <div className="flex items-center">
                                         <User className="w-8 h-8 bg-gray-100 rounded-full p-2" />
-                                        <div className="flex flex-col items-center">
+                                        <div className="flex flex-col items-start">
                                             <span className="text-xs font-semibold text-gray-800">{post.account_name}</span>
                                             <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs ">
                                                 @{post.account_username || "username"}
