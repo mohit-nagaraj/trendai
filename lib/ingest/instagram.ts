@@ -3,6 +3,13 @@ import { parseCsvToObjects } from '@/utils/csv';
 
 const BUCKET = 'final-round-ai-files';
 
+// Utility to parse numbers with commas
+export function parseNumberWithCommas(val: string | number | undefined | null): number {
+  if (typeof val === 'number') return val;
+  if (!val) return 0;
+  return Number(String(val).replace(/,/g, '')) || 0;
+}
+
 export async function processInstagramCsv(csvString: string, processId: string) {
   const supabaseBg = await createClient();
   const rows = parseCsvToObjects(csvString);
@@ -18,11 +25,13 @@ export async function processInstagramCsv(csvString: string, processId: string) 
       continue;
     }
     // Calculate metrics
-    const likes = Number(row['Likes']) || 0;
-    const comments = Number(row['Comments']) || 0;
-    const shares = Number(row['Shares']) || 0;
-    const saves = Number(row['Saves']) || 0;
-    const reach = Number(row['Reach']) || 0;
+    const likes = parseNumberWithCommas(row['Likes']);
+    const comments = parseNumberWithCommas(row['Comments']);
+    const shares = parseNumberWithCommas(row['Shares']);
+    const saves = parseNumberWithCommas(row['Saves']);
+    const reach = parseNumberWithCommas(row['Reach']);
+    const views = parseNumberWithCommas(row['Views']);
+    const follows = parseNumberWithCommas(row['Follows']);
     const engagement_rate = reach > 0 ? ((likes + comments + shares + saves) / reach) * 100 : 0;
     const viral_coefficient = reach > 0 ? shares / reach : 0;
     const performance_score = 0.4 * engagement_rate + 0.6 * viral_coefficient * 100;
@@ -75,17 +84,17 @@ export async function processInstagramCsv(csvString: string, processId: string) 
       account_username: row['Account username'],
       account_name: row['Account name'],
       description: row['Description'],
-      duration_sec: Number(row['Duration (sec)']) || 0,
+      duration_sec: parseNumberWithCommas(row['Duration (sec)']),
       publish_time: row['Publish time'] ? new Date(row['Publish time']) : null,
       permalink: permapostlink,
       post_type: row['Post type'],
       data_comment: 'Imported for Q2 Analysis',
       date_field: row['Date'],
-      views: Number(row['Views'].replace(/,/g, '')) || 0,
+      views,
       reach,
       likes,
       shares,
-      follows: Number(row['Follows']) || 0,
+      follows,
       comments,
       saves,
       engagement_rate: Number(engagement_rate.toFixed(2)),

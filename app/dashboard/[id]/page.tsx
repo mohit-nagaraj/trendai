@@ -10,7 +10,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { platformBadge, statusColor } from "@/lib/badge-colors";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ArrowUpRightIcon, ChevronsUp, Eye, Heart, MessageCircle, Send, Share, User, Zap } from "lucide-react";
+import { ArrowUpRightIcon, ChevronsUp, Eye, Heart, MessageCircle, Send, User, Zap } from "lucide-react";
 import {
     Accordion,
     AccordionContent,
@@ -84,16 +84,28 @@ const DashboardPage: FC = () => {
     }
     if (error) {
         return (
+            <SidebarProvider>
+            <AppSidebar variant="inset" />
+            <SidebarInset>
+                <SiteHeader title="Detailed Post Analysis" />
             <div className="flex items-center justify-center h-[80vh] text-red-500">
                 <span className="text-lg font-semibold">{error}</span>
             </div>
+            </SidebarInset>
+            </SidebarProvider>
         );
     }
     if (!post || !analysis) {
         return (
+            <SidebarProvider>
+            <AppSidebar variant="inset" />
+            <SidebarInset>
+                <SiteHeader title="Detailed Post Analysis" />
             <div className="flex items-center justify-center h-[80vh] text-gray-500">
                 <span className="text-lg font-semibold">No data found.</span>
             </div>
+            </SidebarInset>
+            </SidebarProvider>
         );
     }
 

@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { parseCsvToObjects } from '@/utils/csv';
+import { parseNumberWithCommas } from './instagram';
 
 const BUCKET = 'final-round-ai-files';
 
@@ -31,10 +32,10 @@ export async function processTiktokCsv(csvString: string, processId: string) {
       continue;
     }
     // Calculate metrics
-    const likes = Number(row['Total likes']) || 0;
-    const comments = Number(row['Total comments']) || 0;
-    const shares = Number(row['Total shares']) || 0;
-    const views = Number(row['Total views']) || 0;
+    const likes = parseNumberWithCommas(row['Total likes']);
+    const comments = parseNumberWithCommas(row['Total comments']);
+    const shares = parseNumberWithCommas(row['Total shares']);
+    const views = parseNumberWithCommas(row['Total views']);
     const engagement_rate = views > 0 ? ((likes + comments + shares) / views) * 100 : 0;
     const viral_coefficient = views > 0 ? shares / views : 0;
     const performance_score = 0.4 * engagement_rate + 0.6 * viral_coefficient * 100;
@@ -105,7 +106,7 @@ export async function processTiktokCsv(csvString: string, processId: string) {
       shares,
       follows: null,
       comments,
-      saves: apiData.data?.download_count || null,
+      saves: apiData.data?.download_count ? parseNumberWithCommas(apiData.data.download_count) : null,
       engagement_rate: Number(engagement_rate.toFixed(2)),
       viral_coefficient: Number(viral_coefficient.toFixed(2)),
       performance_score: Number(performance_score.toFixed(2)),

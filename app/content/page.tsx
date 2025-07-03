@@ -6,8 +6,10 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { VideoIcon, ImageIcon, LoaderCircle } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import React, { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { platformBadge } from "@/lib/badge-colors";
 
 const VIDEOS_PER_PAGE = 12;
 const BUCKET = "final-round-ai-files";
@@ -18,6 +20,20 @@ function getFileType(url: string) {
   if (["mp4", "mov", "webm"].includes(ext || "")) return "video";
   if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext || "")) return "image";
   return "unknown";
+}
+
+function extractPlatformAndId(url: string) {
+  // Extract filename from URL
+  const filename = url.split('/').pop() || '';
+  // Regex to match platform_id.ext format
+  const match = filename.match(/^(instagram|tiktok)_(\d+)\./);
+  if (match) {
+    return {
+      platform: match[1],
+      id: match[2]
+    };
+  }
+  return null;
 }
 
 export default function VideosPage() {
@@ -84,43 +100,55 @@ export default function VideosPage() {
               ) : (
                 <>
                   <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-center">
-                    {paginatedFiles.map((media) => (
-                      <div
-                        key={media.url}
-                        className="relative group cursor-pointer rounded-lg overflow-hidden border shadow hover:shadow-lg transition flex items-center justify-center bg-black max-w-[220px] max-h-[220px] w-full aspect-square mx-auto"
-                        style={{ aspectRatio: '1 / 1' }}
-                        onClick={() => handleOpen(media)}
-                      >
-                        {media.type === "video" ? (
-                          <video
-                            src={media.url}
-                            className="w-full h-full object-cover bg-black"
-                            style={{ maxWidth: '220px', maxHeight: '220px' }}
-                            controls={false}
-                            preload="metadata"
-                            muted
-                            onMouseOver={e => (e.currentTarget.play())}
-                            onMouseOut={e => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
-                          />
-                        ) : media.type === "image" ? (
-                          <img
-                            src={media.url}
-                            alt="Media thumbnail"
-                            className="w-full h-full object-cover bg-black"
-                            style={{ maxWidth: '220px', maxHeight: '220px' }}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-200">Unknown</div>
-                        )}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
-                          {media.type === "video" ? (
-                            <VideoIcon className="h-10 w-10 text-white" />
-                          ) : media.type === "image" ? (
-                            <ImageIcon className="h-10 w-10 text-white" />
-                          ) : null}
+                    {paginatedFiles.map((media) => {
+                      const platformInfo = extractPlatformAndId(media.url);
+                      return (
+                        <div key={media.url} className="flex flex-col items-center">
+                          <div
+                            className="relative group cursor-pointer rounded-lg overflow-hidden border shadow hover:shadow-lg transition flex items-center justify-center bg-black max-w-[220px] max-h-[220px] w-full aspect-square mx-auto"
+                            style={{ aspectRatio: '1 / 1' }}
+                            onClick={() => handleOpen(media)}
+                          >
+                            {media.type === "video" ? (
+                              <video
+                                src={media.url}
+                                className="w-full h-full object-cover bg-black"
+                                style={{ maxWidth: '220px', maxHeight: '220px' }}
+                                controls={false}
+                                preload="metadata"
+                                muted
+                                onMouseOver={e => (e.currentTarget.play())}
+                                onMouseOut={e => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
+                              />
+                            ) : media.type === "image" ? (
+                              <img
+                                src={media.url}
+                                alt="Media thumbnail"
+                                className="w-full h-full object-cover bg-black"
+                                style={{ maxWidth: '220px', maxHeight: '220px' }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-200">Unknown</div>
+                            )}
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                              {media.type === "video" ? (
+                                <VideoIcon className="h-10 w-10 text-white" />
+                              ) : media.type === "image" ? (
+                                <ImageIcon className="h-10 w-10 text-white" />
+                              ) : null}
+                            </div>
+                          </div>
+                          {platformInfo && (
+                            <div className="mt-2 flex flex-col items-center gap-1">
+                              <Badge variant="outline" className={`${platformBadge(platformInfo.platform)}`}>
+                                {platformInfo.platform}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">{platformInfo.id}</span>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   {totalPages > 1 && (
                     <div className="flex justify-center items-center gap-2 mt-8">
