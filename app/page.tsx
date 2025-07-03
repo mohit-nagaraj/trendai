@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { UploadIcon, FileTextIcon, FileSpreadsheet, CloudUpload } from "lucide-react";
+import { UploadIcon, FileTextIcon, FileSpreadsheet, CloudUpload, Download } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -192,6 +192,19 @@ export default function Page() {
                   </div>
                 )}
               </div>
+                {/* Download template option */}
+                {source && (
+                  <div className="w-full flex justify-end mt-4">
+                    <a
+                      href={`/${source}-template.csv`}
+                      download
+                      className="text-primary/70 text-sm cursor-pointer flex gap-1"
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <Download className="w-4 h-4"/> <div><span className="capitalize">{source}</span> template</div>
+                    </a>
+                  </div>
+                )}
             </CardContent>
           </Card>
         </main>
