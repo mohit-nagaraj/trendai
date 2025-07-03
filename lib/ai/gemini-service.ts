@@ -73,7 +73,14 @@ Analyze the provided video/image for:
 5. Visual storytelling effectiveness
 
 BRAND CONTEXT:
-Final Round AI helps people ace technical interviews and advance their careers. Target audience includes software engineers, data scientists, and product managers seeking career growth. The brand should feel professional, trustworthy, and empowering.
+Final Round AI is an AI‑powered interview coach and career accelerator that guides candidates through every stage—from resume creation to live interview simulations and post‑session feedback. Serving over 300,000+ offers and 1.2M+ interviews, the brand offers tools like:
+- Interview Copilot: a real‑time assistant during live and mock interviews, offering question prompts, structured frameworks, code guidance, and soft‑skill cues.
+- AI Resume & Cover Letter Builder: ATS‑optimized materials personalized to users' experience and roles.
+- Mock Interviews & Question Bank: industry‑specific practice with customizable Q&A and performance analytics
+- Coding Copilot: live coding help during technical interviews (debugging, pattern hints)
+- Post‑Interview Reports: evaluation of strengths, areas to improve, confidence metrics, and sentiment breakdown
+Target audience: Early to mid‑career tech professionals—software engineers, data scientists, product managers, and tech-savvy career changers—especially those preparing for high‑stakes interviews at top companies.
+Brand personality: Professional, empowering, and tech‑driven—balancing polished, ATS‑grade visuals and UI with trustworthy support. It positions itself as both a mentor and a stealthy backstage coach, blending human mentorship with AI efficiency.
 
 ANALYSIS REQUIREMENTS:
 Provide detailed analysis in the following JSON structure:
