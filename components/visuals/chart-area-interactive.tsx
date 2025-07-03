@@ -28,109 +28,109 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 export const description = "An interactive area chart";
 
 const chartData = [
-  { date: "2024-04-01", desktop: 222, mobile: 150 },
-  { date: "2024-04-02", desktop: 97, mobile: 180 },
-  { date: "2024-04-03", desktop: 167, mobile: 120 },
-  { date: "2024-04-04", desktop: 242, mobile: 260 },
-  { date: "2024-04-05", desktop: 373, mobile: 290 },
-  { date: "2024-04-06", desktop: 301, mobile: 340 },
-  { date: "2024-04-07", desktop: 245, mobile: 180 },
-  { date: "2024-04-08", desktop: 409, mobile: 320 },
-  { date: "2024-04-09", desktop: 59, mobile: 110 },
-  { date: "2024-04-10", desktop: 261, mobile: 190 },
-  { date: "2024-04-11", desktop: 327, mobile: 350 },
-  { date: "2024-04-12", desktop: 292, mobile: 210 },
-  { date: "2024-04-13", desktop: 342, mobile: 380 },
-  { date: "2024-04-14", desktop: 137, mobile: 220 },
-  { date: "2024-04-15", desktop: 120, mobile: 170 },
-  { date: "2024-04-16", desktop: 138, mobile: 190 },
-  { date: "2024-04-17", desktop: 446, mobile: 360 },
-  { date: "2024-04-18", desktop: 364, mobile: 410 },
-  { date: "2024-04-19", desktop: 243, mobile: 180 },
-  { date: "2024-04-20", desktop: 89, mobile: 150 },
-  { date: "2024-04-21", desktop: 137, mobile: 200 },
-  { date: "2024-04-22", desktop: 224, mobile: 170 },
-  { date: "2024-04-23", desktop: 138, mobile: 230 },
-  { date: "2024-04-24", desktop: 387, mobile: 290 },
-  { date: "2024-04-25", desktop: 215, mobile: 250 },
-  { date: "2024-04-26", desktop: 75, mobile: 130 },
-  { date: "2024-04-27", desktop: 383, mobile: 420 },
-  { date: "2024-04-28", desktop: 122, mobile: 180 },
-  { date: "2024-04-29", desktop: 315, mobile: 240 },
-  { date: "2024-04-30", desktop: 454, mobile: 380 },
-  { date: "2024-05-01", desktop: 165, mobile: 220 },
-  { date: "2024-05-02", desktop: 293, mobile: 310 },
-  { date: "2024-05-03", desktop: 247, mobile: 190 },
-  { date: "2024-05-04", desktop: 385, mobile: 420 },
-  { date: "2024-05-05", desktop: 481, mobile: 390 },
-  { date: "2024-05-06", desktop: 498, mobile: 520 },
-  { date: "2024-05-07", desktop: 388, mobile: 300 },
-  { date: "2024-05-08", desktop: 149, mobile: 210 },
-  { date: "2024-05-09", desktop: 227, mobile: 180 },
-  { date: "2024-05-10", desktop: 293, mobile: 330 },
-  { date: "2024-05-11", desktop: 335, mobile: 270 },
-  { date: "2024-05-12", desktop: 197, mobile: 240 },
-  { date: "2024-05-13", desktop: 197, mobile: 160 },
-  { date: "2024-05-14", desktop: 448, mobile: 490 },
-  { date: "2024-05-15", desktop: 473, mobile: 380 },
-  { date: "2024-05-16", desktop: 338, mobile: 400 },
-  { date: "2024-05-17", desktop: 499, mobile: 420 },
-  { date: "2024-05-18", desktop: 315, mobile: 350 },
-  { date: "2024-05-19", desktop: 235, mobile: 180 },
-  { date: "2024-05-20", desktop: 177, mobile: 230 },
-  { date: "2024-05-21", desktop: 82, mobile: 140 },
-  { date: "2024-05-22", desktop: 81, mobile: 120 },
-  { date: "2024-05-23", desktop: 252, mobile: 290 },
-  { date: "2024-05-24", desktop: 294, mobile: 220 },
-  { date: "2024-05-25", desktop: 201, mobile: 250 },
-  { date: "2024-05-26", desktop: 213, mobile: 170 },
-  { date: "2024-05-27", desktop: 420, mobile: 460 },
-  { date: "2024-05-28", desktop: 233, mobile: 190 },
-  { date: "2024-05-29", desktop: 78, mobile: 130 },
-  { date: "2024-05-30", desktop: 340, mobile: 280 },
-  { date: "2024-05-31", desktop: 178, mobile: 230 },
-  { date: "2024-06-01", desktop: 178, mobile: 200 },
-  { date: "2024-06-02", desktop: 470, mobile: 410 },
-  { date: "2024-06-03", desktop: 103, mobile: 160 },
-  { date: "2024-06-04", desktop: 439, mobile: 380 },
-  { date: "2024-06-05", desktop: 88, mobile: 140 },
-  { date: "2024-06-06", desktop: 294, mobile: 250 },
-  { date: "2024-06-07", desktop: 323, mobile: 370 },
-  { date: "2024-06-08", desktop: 385, mobile: 320 },
-  { date: "2024-06-09", desktop: 438, mobile: 480 },
-  { date: "2024-06-10", desktop: 155, mobile: 200 },
-  { date: "2024-06-11", desktop: 92, mobile: 150 },
-  { date: "2024-06-12", desktop: 492, mobile: 420 },
-  { date: "2024-06-13", desktop: 81, mobile: 130 },
-  { date: "2024-06-14", desktop: 426, mobile: 380 },
-  { date: "2024-06-15", desktop: 307, mobile: 350 },
-  { date: "2024-06-16", desktop: 371, mobile: 310 },
-  { date: "2024-06-17", desktop: 475, mobile: 520 },
-  { date: "2024-06-18", desktop: 107, mobile: 170 },
-  { date: "2024-06-19", desktop: 341, mobile: 290 },
-  { date: "2024-06-20", desktop: 408, mobile: 450 },
-  { date: "2024-06-21", desktop: 169, mobile: 210 },
-  { date: "2024-06-22", desktop: 317, mobile: 270 },
-  { date: "2024-06-23", desktop: 480, mobile: 530 },
-  { date: "2024-06-24", desktop: 132, mobile: 180 },
-  { date: "2024-06-25", desktop: 141, mobile: 190 },
-  { date: "2024-06-26", desktop: 434, mobile: 380 },
-  { date: "2024-06-27", desktop: 448, mobile: 490 },
-  { date: "2024-06-28", desktop: 149, mobile: 200 },
-  { date: "2024-06-29", desktop: 103, mobile: 160 },
-  { date: "2024-06-30", desktop: 446, mobile: 400 },
+  { date: "2024-04-01", instagram: 222, tiktok: 150 },
+  { date: "2024-04-02", instagram: 97, tiktok: 180 },
+  { date: "2024-04-03", instagram: 167, tiktok: 120 },
+  { date: "2024-04-04", instagram: 242, tiktok: 260 },
+  { date: "2024-04-05", instagram: 373, tiktok: 290 },
+  { date: "2024-04-06", instagram: 301, tiktok: 340 },
+  { date: "2024-04-07", instagram: 245, tiktok: 180 },
+  { date: "2024-04-08", instagram: 409, tiktok: 320 },
+  { date: "2024-04-09", instagram: 59, tiktok: 110 },
+  { date: "2024-04-10", instagram: 261, tiktok: 190 },
+  { date: "2024-04-11", instagram: 327, tiktok: 350 },
+  { date: "2024-04-12", instagram: 292, tiktok: 210 },
+  { date: "2024-04-13", instagram: 342, tiktok: 380 },
+  { date: "2024-04-14", instagram: 137, tiktok: 220 },
+  { date: "2024-04-15", instagram: 120, tiktok: 170 },
+  { date: "2024-04-16", instagram: 138, tiktok: 190 },
+  { date: "2024-04-17", instagram: 446, tiktok: 360 },
+  { date: "2024-04-18", instagram: 364, tiktok: 410 },
+  { date: "2024-04-19", instagram: 243, tiktok: 180 },
+  { date: "2024-04-20", instagram: 89, tiktok: 150 },
+  { date: "2024-04-21", instagram: 137, tiktok: 200 },
+  { date: "2024-04-22", instagram: 224, tiktok: 170 },
+  { date: "2024-04-23", instagram: 138, tiktok: 230 },
+  { date: "2024-04-24", instagram: 387, tiktok: 290 },
+  { date: "2024-04-25", instagram: 215, tiktok: 250 },
+  { date: "2024-04-26", instagram: 75, tiktok: 130 },
+  { date: "2024-04-27", instagram: 383, tiktok: 420 },
+  { date: "2024-04-28", instagram: 122, tiktok: 180 },
+  { date: "2024-04-29", instagram: 315, tiktok: 240 },
+  { date: "2024-04-30", instagram: 454, tiktok: 380 },
+  { date: "2024-05-01", instagram: 165, tiktok: 220 },
+  { date: "2024-05-02", instagram: 293, tiktok: 310 },
+  { date: "2024-05-03", instagram: 247, tiktok: 190 },
+  { date: "2024-05-04", instagram: 385, tiktok: 420 },
+  { date: "2024-05-05", instagram: 481, tiktok: 390 },
+  { date: "2024-05-06", instagram: 498, tiktok: 520 },
+  { date: "2024-05-07", instagram: 388, tiktok: 300 },
+  { date: "2024-05-08", instagram: 149, tiktok: 210 },
+  { date: "2024-05-09", instagram: 227, tiktok: 180 },
+  { date: "2024-05-10", instagram: 293, tiktok: 330 },
+  { date: "2024-05-11", instagram: 335, tiktok: 270 },
+  { date: "2024-05-12", instagram: 197, tiktok: 240 },
+  { date: "2024-05-13", instagram: 197, tiktok: 160 },
+  { date: "2024-05-14", instagram: 448, tiktok: 490 },
+  { date: "2024-05-15", instagram: 473, tiktok: 380 },
+  { date: "2024-05-16", instagram: 338, tiktok: 400 },
+  { date: "2024-05-17", instagram: 499, tiktok: 420 },
+  { date: "2024-05-18", instagram: 315, tiktok: 350 },
+  { date: "2024-05-19", instagram: 235, tiktok: 180 },
+  { date: "2024-05-20", instagram: 177, tiktok: 230 },
+  { date: "2024-05-21", instagram: 82, tiktok: 140 },
+  { date: "2024-05-22", instagram: 81, tiktok: 120 },
+  { date: "2024-05-23", instagram: 252, tiktok: 290 },
+  { date: "2024-05-24", instagram: 294, tiktok: 220 },
+  { date: "2024-05-25", instagram: 201, tiktok: 250 },
+  { date: "2024-05-26", instagram: 213, tiktok: 170 },
+  { date: "2024-05-27", instagram: 420, tiktok: 460 },
+  { date: "2024-05-28", instagram: 233, tiktok: 190 },
+  { date: "2024-05-29", instagram: 78, tiktok: 130 },
+  { date: "2024-05-30", instagram: 340, tiktok: 280 },
+  { date: "2024-05-31", instagram: 178, tiktok: 230 },
+  { date: "2024-06-01", instagram: 178, tiktok: 200 },
+  { date: "2024-06-02", instagram: 470, tiktok: 410 },
+  { date: "2024-06-03", instagram: 103, tiktok: 160 },
+  { date: "2024-06-04", instagram: 439, tiktok: 380 },
+  { date: "2024-06-05", instagram: 88, tiktok: 140 },
+  { date: "2024-06-06", instagram: 294, tiktok: 250 },
+  { date: "2024-06-07", instagram: 323, tiktok: 370 },
+  { date: "2024-06-08", instagram: 385, tiktok: 320 },
+  { date: "2024-06-09", instagram: 438, tiktok: 480 },
+  { date: "2024-06-10", instagram: 155, tiktok: 200 },
+  { date: "2024-06-11", instagram: 92, tiktok: 150 },
+  { date: "2024-06-12", instagram: 492, tiktok: 420 },
+  { date: "2024-06-13", instagram: 81, tiktok: 130 },
+  { date: "2024-06-14", instagram: 426, tiktok: 380 },
+  { date: "2024-06-15", instagram: 307, tiktok: 350 },
+  { date: "2024-06-16", instagram: 371, tiktok: 310 },
+  { date: "2024-06-17", instagram: 475, tiktok: 520 },
+  { date: "2024-06-18", instagram: 107, tiktok: 170 },
+  { date: "2024-06-19", instagram: 341, tiktok: 290 },
+  { date: "2024-06-20", instagram: 408, tiktok: 450 },
+  { date: "2024-06-21", instagram: 169, tiktok: 210 },
+  { date: "2024-06-22", instagram: 317, tiktok: 270 },
+  { date: "2024-06-23", instagram: 480, tiktok: 530 },
+  { date: "2024-06-24", instagram: 132, tiktok: 180 },
+  { date: "2024-06-25", instagram: 141, tiktok: 190 },
+  { date: "2024-06-26", instagram: 434, tiktok: 380 },
+  { date: "2024-06-27", instagram: 448, tiktok: 490 },
+  { date: "2024-06-28", instagram: 149, tiktok: 200 },
+  { date: "2024-06-29", instagram: 103, tiktok: 160 },
+  { date: "2024-06-30", instagram: 446, tiktok: 400 },
 ];
 
 const chartConfig = {
   visitors: {
-    label: "Visitors",
+    label: "Views",
   },
-  desktop: {
-    label: "Desktop",
+  instagram: {
+    label: "Instagram",
     color: "var(--chart-1)",
   },
-  mobile: {
-    label: "Mobile",
+  tiktok: {
+    label: "TikTok",
     color: "var(--chart-2)",
   },
 } satisfies ChartConfig;
@@ -162,10 +162,10 @@ export function ChartAreaInteractive() {
   return (
     <Card className="@container/card">
       <CardHeader className="relative">
-        <CardTitle>Total Visitors</CardTitle>
+        <CardTitle>Total Views</CardTitle>
         <CardDescription>
           <span className="@[540px]/card:block hidden">
-            Total for the last 3 months
+            Aggregated view count across different platforms
           </span>
           <span className="@[540px]/card:hidden">Last 3 months</span>
         </CardDescription>
@@ -218,24 +218,24 @@ export function ChartAreaInteractive() {
               <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-desktop)"
+                  stopColor="var(--color-instagram)"
                   stopOpacity={1.0}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-desktop)"
+                  stopColor="var(--color-instagram)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
               <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-mobile)"
+                  stopColor="var(--color-tiktok)"
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-mobile)"
+                  stopColor="var(--color-tiktok)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
@@ -270,17 +270,17 @@ export function ChartAreaInteractive() {
               }
             />
             <Area
-              dataKey="mobile"
+              dataKey="tiktok"
               type="natural"
               fill="url(#fillMobile)"
-              stroke="var(--color-mobile)"
+              stroke="var(--color-tiktok)"
               stackId="a"
             />
             <Area
-              dataKey="desktop"
+              dataKey="instagram"
               type="natural"
               fill="url(#fillDesktop)"
-              stroke="var(--color-desktop)"
+              stroke="var(--color-instagram)"
               stackId="a"
             />
           </AreaChart>
