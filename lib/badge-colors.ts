@@ -5,6 +5,15 @@ export function platformBadge(platform: string) {
     if (platform === "tiktok") {
         return "border-black text-black";
     }
+    if (platform === "linkedin") {
+        return "border-blue-600 text-blue-700";
+    }
+    if (platform === "youtube") {
+        return "border-red-600 text-red-700";
+    }
+    if (platform === "twitter" || platform === "twitter/x" || platform === "x") {
+        return "border-sky-400 text-sky-700";
+    }
     return "border-gray-300 text-gray-600";
 }
 

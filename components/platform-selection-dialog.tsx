@@ -113,7 +113,7 @@ export function PlatformSelectionDialog({
         </div>
         <Separator className="my-4" />
         <DialogFooter>
-          <Button onClick={handleGenerate} disabled={selectedPlatforms.length === 0 || loading}>
+          <Button onClick={handleGenerate} className='cursor-pointer' disabled={selectedPlatforms.length === 0 || loading}>
             {loading ? 'Generating...' : 'Generate Ideas'}
           </Button>
         </DialogFooter>

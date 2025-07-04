@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Star } from 'lucide-react';
+import { platformBadge } from '@/lib/badge-colors';
 
 export type ContentIdea = {
   id: string;
@@ -17,7 +18,7 @@ export type ContentIdea = {
   rationale?: string;
   content_type?: string;
   platform?: string;
-  tags?: any;
+  tags?: string[] | Record<string, unknown> | null;
   is_starred?: boolean;
   created_at?: string;
   updated_at?: string;
@@ -33,7 +34,7 @@ export function ContentIdeasTable({ data, loading = false, onRowClick }: Content
   return (
     <div className="overflow-x-auto rounded-lg border">
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-muted">
           <TableRow>
             <TableHead>Title</TableHead>
             <TableHead>Platform</TableHead>
@@ -61,11 +62,11 @@ export function ContentIdeasTable({ data, loading = false, onRowClick }: Content
                 onClick={() => onRowClick?.(idea)}
               >
                 <TableCell className="font-medium">{idea.title}</TableCell>
-                <TableCell>{idea.platform ? <Badge>{idea.platform}</Badge> : '-'}</TableCell>
+                <TableCell>{idea.platform ? <Badge className={platformBadge(idea.platform)+' bg-transparent capitalize'}>{idea.platform}</Badge> : '-'}</TableCell>
                 <TableCell>{idea.content_type || '-'}</TableCell>
                 <TableCell>{idea.created_at ? new Date(idea.created_at).toLocaleString() : '-'}</TableCell>
                 <TableCell>
-                  <Switch checked={!!idea.is_starred} disabled className="pointer-events-none" />
+                  <Star color={idea.is_starred ? '#EED202' : '#000'} fill={idea.is_starred ? '#EED202' : 'transparent'} strokeWidth={idea.is_starred ? 0 : 1} className='w-4 h-4' />
                 </TableCell>
               </TableRow>
             ))

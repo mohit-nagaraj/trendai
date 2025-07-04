@@ -16,6 +16,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PlatformSelectionDialog } from "@/components/platform-selection-dialog";
+import { toast } from "sonner";
 
 // TODO: Replace with actual inspirationId source (e.g., from context, props, or selection)
 const INSPIRATION_ID = "REPLACE_WITH_ACTUAL_ID";
@@ -237,12 +238,13 @@ export default function AiTrendsPage() {
   const handleGenerate = async (selectedPlatforms: string[]) => {
     setGenerateLoading(true);
     try {
+      setDialogOpen2(false);
+      toast.success("Generating ideas...");
       await fetch("/api/v1/ideas/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ inspirationId: activeInspiration?.id, platforms: selectedPlatforms })
       });
-      setDialogOpen(false);
       await fetchIdeas();
     } catch (err) {
       console.error('Failed to generate ideas', err);
