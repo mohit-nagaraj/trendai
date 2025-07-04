@@ -29,7 +29,7 @@ interface ChatWithAIProps {
     idea: ContentIdea;
     open: boolean;
     setOpen: (open: boolean) => void;
-    refreshIdea: () => void;
+    refreshIdea: (updatedIdea?: ContentIdea) => void;
     className?: string;
     style?: React.CSSProperties;
 }
@@ -71,7 +71,7 @@ const ChatWithAI: React.FC<ChatWithAIProps> = ({ idea, open, setOpen, refreshIde
                 setMessages(msgs => [...msgs, { role: 'ai', content: data.aiMessage }]);
                 if (data.updatedIdea) {
                     setPendingUpdate(data.updatedIdea);
-                    refreshIdea(); // Refetch latest idea from parent
+                    refreshIdea(data.updatedIdea);
                 }
             }
         } catch {
@@ -83,7 +83,7 @@ const ChatWithAI: React.FC<ChatWithAIProps> = ({ idea, open, setOpen, refreshIde
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className={`max-w-2xl w-full p-2 overflow-hidden ${className || ''}`} style={style}>
+            <DialogContent className={`max-w-2xl w-full p-4 overflow-hidden ${className || ''}`} style={style}>
                 <DialogHeader>
                     <DialogTitle>Chat with AI</DialogTitle>
                     <DialogDescription>
@@ -124,7 +124,6 @@ const ChatWithAI: React.FC<ChatWithAIProps> = ({ idea, open, setOpen, refreshIde
                     {pendingUpdate && (
                         <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-xs text-green-700">
                             <div>Idea updated!</div>
-                            <pre className="whitespace-pre-wrap break-all">{JSON.stringify(pendingUpdate, null, 2)}</pre>
                         </div>
                     )}
                 </div>

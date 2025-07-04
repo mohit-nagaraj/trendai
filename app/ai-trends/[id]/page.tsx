@@ -58,23 +58,12 @@ export default function ContentIdeaDetailPage() {
     const supabase = createClient();
     const { generatePDF, isGenerating, error: pdfError } = usePDFGenerator();
 
-    const refreshIdea = async () => {
-        if (!id) return;
-        setLoading(true);
-        setError(null);
-        const { data: ideaData, error: ideaError } = await supabase
-            .from('content_ideas')
-            .select('*')
-            .eq('id', id)
-            .single();
-        if (ideaError || !ideaData) {
-            setError('Idea not found');
-            setLoading(false);
+    const refreshIdea = async (updatedIdea?: ContentIdea) => {
+        if (updatedIdea) {
+            setIdea(updatedIdea);
+            setIsStarred(updatedIdea.is_starred||false);
             return;
         }
-        setIdea(ideaData);
-        setIsStarred(ideaData.is_starred);
-        setLoading(false);
     };
 
     useEffect(() => {
@@ -308,7 +297,7 @@ export default function ContentIdeaDetailPage() {
 }
 
 // Floating Chat Button and modal state
-function FloatingChatButton({ idea, refreshIdea }: { idea: ChatContentIdea, refreshIdea: () => void }) {
+function FloatingChatButton({ idea, refreshIdea }: { idea: ChatContentIdea, refreshIdea: (updatedIdea?: ChatContentIdea) => void }) {
     const [open, setOpen] = useState(false);
     return (
         <>
