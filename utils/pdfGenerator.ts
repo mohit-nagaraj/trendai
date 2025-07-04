@@ -129,14 +129,12 @@ export const generateContentIdeaPDF = async (
         <div style="background: #fffcf4; border: 2px dashed #d1d5db; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
           ${idea.hook ? `
             <div style="margin-bottom: ${idea.visual_style ? '12px' : '0'};">
-              <span style="font-size: 15px; font-weight: 600; color: black !important;">Hook:</span>
-              <span style="font-size: 15px; color: #374151; margin-left: 8px;">${idea.hook}</span>
+              <span style="font-size: 15px; color: #374151; margin-left: 8px;"><b>Hook:</b> ${idea.hook}</span>
             </div>
           ` : ''}
           ${idea.visual_style ? `
             <div>
-              <span style="font-size: 15px; font-weight: 600; color: black !important;">Visual Style:</span>
-              <span style="font-size: 15px; color: #374151; margin-left: 8px;">${idea.visual_style}</span>
+              <span style="font-size: 15px; color: #374151; margin-left: 8px;"><b>Visual Style:</b> ${idea.visual_style}</span>
             </div>
           ` : ''}
         </div>
@@ -150,9 +148,9 @@ export const generateContentIdeaPDF = async (
       ` : ''}
       <!-- Target Audience -->
       ${idea.target_audience ? `
-        <div style="margin-bottom: 16px;">
-          <span style="font-size: 15px; font-weight: 600; color: #1a1a1a;">Target Audience:</span>
-          <span style="font-size: 15px; color: #374151; margin-left: 8px;">${idea.target_audience}</span>
+        <div style="margin-bottom: 20px;">
+          <div style="font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px;">Audience:</div>
+          <div style="font-size: 15px; color: #374151; line-height: 1.6;">${idea.target_audience}</div>
         </div>
       ` : ''}
       <!-- Rationale -->
@@ -188,7 +186,7 @@ export const generateContentIdeaPDF = async (
 
   // PDF generation options
   const pdfOptions = {
-    margin: 0.5,
+    margin: [0.7, 0.5, 0.7, 0.5],
     filename: filename,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: {

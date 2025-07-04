@@ -53,7 +53,6 @@ export default function ContentIdeaDetailPage() {
     const [isStarred, setIsStarred] = useState(false);
     const [showInspirationDialog, setShowInspirationDialog] = useState(false);
     const supabase = createClient();
-    const contentRef = useRef<HTMLDivElement>(null);
     const { generatePDF, isGenerating, error: pdfError } = usePDFGenerator();
 
     useEffect(() => {
@@ -174,11 +173,9 @@ export default function ContentIdeaDetailPage() {
             <SidebarInset>
                 <SiteHeader title="Trend Analysis" />
                 <div className='relative'>
-                    <div className="max-w-5xl mx-auto p-6" ref={contentRef}>
+                    <div className="max-w-5xl mx-auto p-6">
                         <div className='flex items-center gap-2 mb-2 justify-between'>
                             <div className='flex items-center gap-2'>
-                                {/* Logo on the left */}
-                                {/* <img src="/Final Round AI.svg" alt="Logo" className="h-10 w-10 mr-2" style={{ minWidth: 40 }} /> */}
                                 <h1 className="text-2xl font-bold">{idea.title}</h1>
                             </div>
                             <div className='flex items-center gap-2'>
