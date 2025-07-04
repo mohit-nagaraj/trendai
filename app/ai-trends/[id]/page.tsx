@@ -1,13 +1,13 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { SiteHeader } from '@/components/site-header';
 import { AppSidebar } from '@/components/sidebar/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Download, Star } from 'lucide-react';
+import { ArrowUpRight, Download, Star } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { usePDFGenerator } from '@/utils/pdfGenerator';
 
@@ -44,10 +44,12 @@ interface ContentInspiration {
 
 export default function ContentIdeaDetailPage() {
     const params = useParams();
+    const router = useRouter();
     const id = params.id as string;
 
     const [idea, setIdea] = useState<ContentIdea | null>(null);
     const [inspiration, setInspiration] = useState<ContentInspiration | null>(null);
+    const [similarIdeas, setSimilarIdeas] = useState<ContentIdea[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isStarred, setIsStarred] = useState(false);
@@ -89,8 +91,21 @@ export default function ContentIdeaDetailPage() {
                 setLoading(false);
                 return;
             }
-            console.log(inspData);
             setInspiration(inspData);
+
+            // Fetch similar ideas (same inspiration_id, different id)
+            const { data: similarIdeasData, error: similarIdeasError } = await supabase
+                .from('content_ideas')
+                .select('*')
+                .eq('inspiration_id', ideaData.inspiration_id)
+                .neq('id', id);
+            if (!similarIdeasError && Array.isArray(similarIdeasData)) {
+                console.log("Found similar ideas", similarIdeasData)
+                setSimilarIdeas(similarIdeasData);
+            } else {
+                setSimilarIdeas([]);
+            }
+
             setLoading(false);
         }
         fetchData();
@@ -223,6 +238,37 @@ export default function ContentIdeaDetailPage() {
                         </div>
                         <hr className="my-6" />
                         <h2 className="text-xl font-semibold mb-2">Similar Ideas</h2>
+                    <div className="overflow-x-auto">
+                        <div className="flex gap-4 pb-4" style={{ minWidth: 'max-content' }}>
+                            {similarIdeas.map((similarIdea: any, index: number) => (
+                                <div key={similarIdea.id} className="w-80 flex-shrink-0 border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="font-semibold text-sm truncate">{similarIdea.title}</h3>
+                                        <Badge variant="outline" className="text-xs capitalize">{similarIdea.platform}</Badge>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{similarIdea.description}</p>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex gap-1">
+                                            <Badge variant="secondary" className="text-xs">{similarIdea.content_type}</Badge>
+                                            {similarIdea.predicted_performance_score !== undefined && (
+                                                <Badge variant="outline" className="text-xs">
+                                                    Score: {similarIdea.predicted_performance_score}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm" 
+                                            className="text-xs cursor-pointer"
+                                            onClick={() => router.push(`/ai-trends/${similarIdea.id}`)}
+                                        >
+                                            <ArrowUpRight className='w-4 h-4' />
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                     </div>
                     <Dialog open={showInspirationDialog} onOpenChange={setShowInspirationDialog}>
                         <DialogContent>
