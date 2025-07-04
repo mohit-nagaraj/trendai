@@ -29,11 +29,12 @@ interface ChatWithAIProps {
     idea: ContentIdea;
     open: boolean;
     setOpen: (open: boolean) => void;
+    refreshIdea: () => void;
     className?: string;
     style?: React.CSSProperties;
 }
 
-const ChatWithAI: React.FC<ChatWithAIProps> = ({ idea, open, setOpen, className, style }) => {
+const ChatWithAI: React.FC<ChatWithAIProps> = ({ idea, open, setOpen, refreshIdea, className, style }) => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
@@ -70,6 +71,7 @@ const ChatWithAI: React.FC<ChatWithAIProps> = ({ idea, open, setOpen, className,
                 setMessages(msgs => [...msgs, { role: 'ai', content: data.aiMessage }]);
                 if (data.updatedIdea) {
                     setPendingUpdate(data.updatedIdea);
+                    refreshIdea(); // Refetch latest idea from parent
                 }
             }
         } catch {

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowUpRight, Download, Star, MessageCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { usePDFGenerator } from '@/utils/pdfGenerator';
-import ChatWithAI, { ContentIdea as ChatContentIdea } from '@/components/ui/chat-with-ai';
+import ChatWithAI, { ContentIdea as ChatContentIdea } from '@/components/chat-with-ai';
 
 // Types for content_ideas and content_inspiration
 interface ContentIdea {
@@ -58,11 +58,27 @@ export default function ContentIdeaDetailPage() {
     const supabase = createClient();
     const { generatePDF, isGenerating, error: pdfError } = usePDFGenerator();
 
-    useEffect(() => {
-        if (!id) {
-            console.log('No id');
+    const refreshIdea = async () => {
+        if (!id) return;
+        setLoading(true);
+        setError(null);
+        const { data: ideaData, error: ideaError } = await supabase
+            .from('content_ideas')
+            .select('*')
+            .eq('id', id)
+            .single();
+        if (ideaError || !ideaData) {
+            setError('Idea not found');
+            setLoading(false);
             return;
         }
+        setIdea(ideaData);
+        setIsStarred(ideaData.is_starred);
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        if (!id) return;
         async function fetchData() {
             setLoading(true);
             setError(null);
@@ -72,8 +88,6 @@ export default function ContentIdeaDetailPage() {
                 .select('*')
                 .eq('id', id)
                 .single();
-            console.log(ideaData);
-
             if (ideaError || !ideaData) {
                 setError('Idea not found');
                 setLoading(false);
@@ -93,7 +107,6 @@ export default function ContentIdeaDetailPage() {
                 return;
             }
             setInspiration(inspData);
-
             // Fetch similar ideas (same inspiration_id, different id)
             const { data: similarIdeasData, error: similarIdeasError } = await supabase
                 .from('content_ideas')
@@ -101,12 +114,10 @@ export default function ContentIdeaDetailPage() {
                 .eq('inspiration_id', ideaData.inspiration_id)
                 .neq('id', id);
             if (!similarIdeasError && Array.isArray(similarIdeasData)) {
-                console.log("Found similar ideas", similarIdeasData)
                 setSimilarIdeas(similarIdeasData);
             } else {
                 setSimilarIdeas([]);
             }
-
             setLoading(false);
         }
         fetchData();
@@ -289,7 +300,7 @@ export default function ContentIdeaDetailPage() {
                             </DialogHeader>
                         </DialogContent>
                     </Dialog>
-                    {idea && <FloatingChatButton idea={idea} />}
+                    {idea && <FloatingChatButton idea={idea} refreshIdea={refreshIdea} />}
                 </div>
             </SidebarInset>
         </SidebarProvider>
@@ -297,7 +308,7 @@ export default function ContentIdeaDetailPage() {
 }
 
 // Floating Chat Button and modal state
-function FloatingChatButton({ idea }: { idea: ChatContentIdea }) {
+function FloatingChatButton({ idea, refreshIdea }: { idea: ChatContentIdea, refreshIdea: () => void }) {
     const [open, setOpen] = useState(false);
     return (
         <>
@@ -308,7 +319,7 @@ function FloatingChatButton({ idea }: { idea: ChatContentIdea }) {
             >
                 <MessageCircle className="w-6 h-6" />
             </button>
-            <ChatWithAI idea={idea} open={open} setOpen={setOpen} />
+            <ChatWithAI idea={idea} open={open} setOpen={setOpen} refreshIdea={refreshIdea} />
         </>
     );
 }

@@ -20,6 +20,16 @@ function extractActionFromGemini(text: string) {
 
 const allowedFields = ['hook', 'visual_style', 'content_angle', 'target_audience', 'rationale', 'title', 'description'];
 
+const brandContext = `BRAND CONTEXT:
+Final Round AI is an AI‑powered interview coach and career accelerator that guides candidates through every stage—from resume creation to live interview simulations and post‑session feedback. Serving over 300,000+ offers and 1.2M+ interviews, the brand offers tools like:
+- Interview Copilot: a real‑time assistant during live and mock interviews, offering question prompts, structured frameworks, code guidance, and soft‑skill cues.
+- AI Resume & Cover Letter Builder: ATS‑optimized materials personalized to users' experience and roles.
+- Mock Interviews & Question Bank: industry‑specific practice with customizable Q&A and performance analytics
+- Coding Copilot: live coding help during technical interviews (debugging, pattern hints)
+- Post‑Interview Reports: evaluation of strengths, areas to improve, confidence metrics, and sentiment breakdown
+Target audience: Early to mid‑career tech professionals—software engineers, data scientists, product managers, and tech-savvy career changers—especially those preparing for high‑stakes interviews at top companies.
+Brand personality: Professional, empowering, and tech‑driven—balancing polished, ATS‑grade visuals and UI with trustworthy support. It positions itself as both a mentor and a stealthy backstage coach, blending human mentorship with AI efficiency.`;
+
 export async function POST(request: NextRequest) {
   try {
     const { ideaId, messages }: { ideaId: string; messages: Array<{ role: string; content: string }> } = await request.json();
@@ -37,12 +47,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Idea not found' }, { status: 404 });
     }
     // Prepare Gemini prompt
-    const systemPrompt = `You are an AI agent that helps improve content ideas. You can read and update the idea in the database. Only make changes when the user asks.\n\nCurrent idea:\n${JSON.stringify(idea, null, 2)}\n\nIf the user requests a change, reply with a message and include a JSON block like this:\n\nFor single field:\n\u0060\u0060\u0060json\n{\n  "action": "update",\n  "field": "hook",\n  "value": "New hook text"\n}\n\u0060\u0060\u0060\nFor multiple fields:\n\u0060\u0060\u0060json\n{\n  "action": "update",\n  "updates": [\n    { "field": "hook", "value": "New hook text" },\n    { "field": "rationale", "value": "New rationale" }\n  ]\n}\n\u0060\u0060\u0060\nOtherwise, just reply as normal.`;
+    const systemPrompt = `You are an expert AI content strategist and agent for Final Round AI. Your job is to help users iteratively improve and transform their content ideas so they are more creative, actionable, and aligned with the brand's mission, voice, and audience.\n\n${brandContext}\n\nYou have access to the current content idea (see below) and can update any of its fields (such as hook, rationale, visual_style, content_angle, target_audience, title, description, etc.) when the user requests or when you see a clear opportunity for improvement.\n\n**Your goals:**\n- Make the idea more compelling, original, and likely to perform well for the target audience.\n- Ensure all changes are consistent with Final Round AI's brand, tone, and value proposition.\n- Suggest improvements that are specific, high-quality, and actionable (not just surface-level edits).\n- You may update multiple fields at once if it will make the idea stronger.\n- Always explain your reasoning and the value of your changes in clear, concise markdown before the JSON block.\n- If the user asks for a specific change, do it and explain why it helps.\n- If you see a better way to achieve the user's goal, suggest it.\n\n**Current idea:**\n${JSON.stringify(idea, null, 2)}\n\n**How to reply:**\n1. Write your reasoning and summary of changes in markdown.\n2. If you are making changes, include a JSON block in one of these formats:\n\nFor single field:\n\u0060\u0060\u0060json\n{\n  "action": "update",\n  "field": "hook",\n  "value": "New hook text"\n}\n\u0060\u0060\u0060\nFor multiple fields:\n\u0060\u0060\u0060json\n{\n  "action": "update",\n  "updates": [\n    { "field": "hook", "value": "New hook text" },\n    { "field": "rationale", "value": "New rationale" }\n  ]\n}\n\u0060\u0060\u0060\nIf no changes are needed, just reply in markdown.\n\n**Chat history:**\n`;
     const chatHistory = messages.map((m: { role: string; content: string }) => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
-    const prompt = `${systemPrompt}\n\nChat history:\n${chatHistory}\n\nRespond as the AI agent.`;
+    const prompt = `${systemPrompt}${chatHistory}\n\nRespond as the AI agent.`;
     const genAI = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_FREE! });
     const response = await genAI.models.generateContent({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-2.5-flash',
       contents: prompt,
     });
     const aiText = response?.text || '';
