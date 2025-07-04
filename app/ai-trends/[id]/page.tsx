@@ -1,15 +1,15 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { SiteHeader } from '@/components/site-header';
 import { AppSidebar } from '@/components/sidebar/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Star } from 'lucide-react';
+import { Download, Star } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { usePDFGenerator } from '@/utils/pdfGenerator';
 
 // Types for content_ideas and content_inspiration
 interface ContentIdea {
@@ -53,6 +53,8 @@ export default function ContentIdeaDetailPage() {
     const [isStarred, setIsStarred] = useState(false);
     const [showInspirationDialog, setShowInspirationDialog] = useState(false);
     const supabase = createClient();
+    const contentRef = useRef<HTMLDivElement>(null);
+    const { generatePDF, isGenerating, error: pdfError } = usePDFGenerator();
 
     useEffect(() => {
         if (!id) {
@@ -114,6 +116,22 @@ export default function ContentIdeaDetailPage() {
         }
     }
 
+    const handleDownloadPDF = async () => {
+        if (!idea) return;
+        const success = await generatePDF(idea, {
+            filename: `${idea.title?.replace(/[^a-z0-9]/gi, '_') || 'content-idea'}.pdf`,
+            logoUrl: '/Final Round AI.svg',
+            includeScore: true,
+            includeRationale: true,
+            includeTags: true
+        });
+        if (success) {
+            console.log('PDF generated successfully');
+        } else {
+            console.error('PDF generation failed:', pdfError);
+        }
+    };
+
     if (loading) {
         return (
             <SidebarProvider>
@@ -156,12 +174,31 @@ export default function ContentIdeaDetailPage() {
             <SidebarInset>
                 <SiteHeader title="Trend Analysis" />
                 <div className='relative'>
-                    <div className="max-w-5xl mx-auto p-6">
-                        <div className='flex items-center gap-2 mb-2'>
-                            <h1 className="text-2xl font-bold">{idea.title}</h1>
-                            <Button variant="ghost2" size="sm" onClick={handleStarClick}>
-                                <Star color={isStarred ? '#EED202' : '#3d3d3d'} fill={isStarred ? '#EED202' : 'transparent'} className='w-4 h-4' />
-                            </Button>
+                    <div className="max-w-5xl mx-auto p-6" ref={contentRef}>
+                        <div className='flex items-center gap-2 mb-2 justify-between'>
+                            <div className='flex items-center gap-2'>
+                                {/* Logo on the left */}
+                                {/* <img src="/Final Round AI.svg" alt="Logo" className="h-10 w-10 mr-2" style={{ minWidth: 40 }} /> */}
+                                <h1 className="text-2xl font-bold">{idea.title}</h1>
+                            </div>
+                            <div className='flex items-center gap-2'>
+                                <Button variant="ghost2" size="sm" onClick={handleStarClick}>
+                                    <Star color={isStarred ? '#EED202' : '#3d3d3d'} fill={isStarred ? '#EED202' : 'transparent'} className='w-4 h-4' />
+                                </Button>
+                                <Button 
+                                    variant="ghost2" 
+                                    size="sm" 
+                                    onClick={handleDownloadPDF} 
+                                    disabled={isGenerating}
+                                >
+                                    {isGenerating ? (
+                                        <span className="w-4 h-4 animate-spin rounded-full border-2 border-b-transparent border-gray-600" />
+                                    ) : (
+                                        <Download className='w-4 h-4'/>
+                                    )}
+                                </Button>
+                                {pdfError && <div className="text-red-500 text-xs ml-2">{pdfError}</div>}
+                            </div>
                         </div>
                         <div className="flex gap-2 mb-4">
                             <Badge variant="outline" className='capitalize'>{idea.platform}</Badge>
@@ -183,9 +220,9 @@ export default function ContentIdeaDetailPage() {
                             )}
                         </div>
                         <div className='flex justify-end'>
-                        <Button variant="outline" size="sm" className='text-gray-700 cursor-pointer' onClick={() => setShowInspirationDialog(true)}>
-                            View Inspiration Details
-                        </Button>
+                            <Button variant="outline" size="sm" className='text-gray-700 cursor-pointer' onClick={() => setShowInspirationDialog(true)}>
+                                View Inspiration Details
+                            </Button>
                         </div>
                         <hr className="my-6" />
                         <h2 className="text-xl font-semibold mb-2">Similar Ideas</h2>
