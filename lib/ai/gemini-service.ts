@@ -268,4 +268,127 @@ export async function getContentInspirationFromTrends(): Promise<Inspiration[]> 
     console.error('Gemini inspiration error:', error);
     return [];
   }
+}
+
+// Type guard for Inspiration
+export function isInspiration(obj: unknown): obj is { title: string; description: string; keywords: string[]; final_score: number } {
+  if (typeof obj !== 'object' || obj === null) return false;
+  const o = obj as Record<string, unknown>;
+  return (
+    typeof o.title === 'string' &&
+    typeof o.description === 'string' &&
+    Array.isArray(o.keywords) &&
+    typeof o.final_score === 'number'
+  );
+}
+
+// Type guard for idea object
+export function isIdea(obj: unknown): obj is { platform?: string } {
+  return typeof obj === 'object' && obj !== null;
+}
+
+// Helper to clean Gemini response (removes ```json, ``` and parses JSON)
+export function parseGeminiJsonResponse(text: string) {
+  const cleaned = text.replace(/```json|```/g, '').trim();
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/) || cleaned.match(/\[[\s\S]*\]/);
+  if (jsonMatch) {
+    return JSON.parse(jsonMatch[0]);
+  }
+  return JSON.parse(cleaned);
+}
+
+/**
+ * Generates content ideas for each platform using Gemini, given an inspiration object and array of platforms.
+ * Returns a flattened array of all generated ideas.
+ */
+export async function generateContentIdeasWithGemini(
+  inspiration: unknown,
+  platforms: string[]
+): Promise<unknown[]> {
+  const allGeneratedIdeas: unknown[] = [];
+  for (const platform of platforms) {
+    const platformIdeas = await generateIdeasForPlatformWithGemini(inspiration, platform);
+    allGeneratedIdeas.push(...platformIdeas);
+  }
+  return allGeneratedIdeas;
+}
+
+async function generateIdeasForPlatformWithGemini(inspiration: unknown, platform: string): Promise<unknown[]> {
+  const genAI = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_FREE! });
+  // Build a detailed context string with all fields from the inspiration object
+  const inspirationDetails = Object.entries(inspiration as Record<string, unknown>)
+    .map(([key, value]) => {
+      if (typeof value === 'object') {
+        try {
+          return `${key}: ${JSON.stringify(value)}`;
+        } catch {
+          return `${key}: [object]`;
+        }
+      }
+      return `${key}: ${value}`;
+    })
+    .join('\n');
+
+  const brandContext = `
+BRAND CONTEXT:
+Final Round AI is an AI‑powered interview coach and career accelerator that guides candidates through every stage—from resume creation to live interview simulations and post‑session feedback. Serving over 300,000+ offers and 1.2M+ interviews, the brand offers tools like:
+- Interview Copilot: a real‑time assistant during live and mock interviews, offering question prompts, structured frameworks, code guidance, and soft‑skill cues.
+- AI Resume & Cover Letter Builder: ATS‑optimized materials personalized to users' experience and roles.
+- Mock Interviews & Question Bank: industry‑specific practice with customizable Q&A and performance analytics
+- Coding Copilot: live coding help during technical interviews (debugging, pattern hints)
+- Post‑Interview Reports: evaluation of strengths, areas to improve, confidence metrics, and sentiment breakdown
+Target audience: Early to mid‑career tech professionals—software engineers, data scientists, product managers, and tech-savvy career changers—especially those preparing for high‑stakes interviews at top companies.
+Brand personality: Professional, empowering, and tech‑driven—balancing polished, ATS‑grade visuals and UI with trustworthy support. It positions itself as both a mentor and a stealthy backstage coach, blending human mentorship with AI efficiency.
+`;
+
+  const prompt = `
+    ${brandContext}
+    \nBased on the following inspiration data, generate exactly only one creative content idea specifically optimized for ${platform.toUpperCase()}:
+    \nINSPIRATION DATA:
+${inspirationDetails}
+    \nFor the idea, provide EXACTLY this JSON structure (no additional text):
+    {\n      "ideas": [
+        {
+          "title": "string",
+          "description": "string",
+          "hook": "string",
+          "visual_style": "string",
+          "content_angle": "string",
+          "target_audience": "string",
+          "predicted_performance_score": number,
+          "rationale": "string",
+          "content_type": "string",
+          "platform": "${platform}",
+          "tags": ["string", "string", "string"]
+        }
+      ]
+    }
+    \nRequirements:
+    - Make content relevant to Final Round AI's mission of helping tech professionals succeed in interviews
+    - Connect the trend to career development, interview preparation, or professional growth
+    - Use platform-specific best practices for ${platform}
+    - Include performance prediction based on platform algorithms
+    - Make hooks attention-grabbing and relevant to our target audience
+    - Ensure visual style matches platform norms
+    - Tags should be relevant to both the trend and our brand
+    \nPlatform-specific guidelines:
+    - Instagram: Visual storytelling, carousel posts, professional aesthetics
+    - TikTok: Short-form video, trending audio, quick tips
+    - LinkedIn: Professional insights, career advice, industry analysis
+    - YouTube: Educational content, detailed tutorials, case studies
+    - Twitter: Quick insights, thread-worthy content, news commentary
+    \nReturn only valid JSON, no other text.
+  `;
+  try {
+    const result = await genAI.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+    const text = result?.text || '';
+    const parsedResponse = parseGeminiJsonResponse(text);
+    if (!parsedResponse.ideas || !Array.isArray(parsedResponse.ideas)) {
+      throw new Error('Invalid response format from Gemini');
+    }
+    return parsedResponse.ideas.map((idea: unknown) => (isIdea(idea) ? { ...idea, platform } : { platform }));
+  } catch (error) {
+    console.error(`Error generating ideas for ${platform}:`, error);
+    return [];
+  }
 } 
