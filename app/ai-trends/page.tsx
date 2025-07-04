@@ -225,6 +225,7 @@ export default function AiTrendsPage() {
       const { data } = await supabase
         .from('content_ideas')
         .select('*')
+        .order('created_at', { ascending: false })
       setIdeas(data || []);
     } catch (err) {
       console.error('Failed to fetch ideas', err);
