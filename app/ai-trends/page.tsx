@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { RefreshCwIcon, LightbulbIcon, Dot } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { DataTable } from "@/components/visuals/data-table";
-import data from "@/data.json";
+import { ContentIdeasTable, ContentIdea } from "@/components/visuals/content-ideas-table";
 import { ChartPieDonut } from "@/components/visuals/chart-pie-donut";
 import { ChartBarMixed } from "@/components/visuals/chart-bar-mixed";
 import React, { useEffect, useState } from "react";
@@ -15,6 +14,11 @@ import { createClient } from "@/utils/supabase/client";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { PlatformSelectionDialog } from "@/components/platform-selection-dialog";
+
+// TODO: Replace with actual inspirationId source (e.g., from context, props, or selection)
+const INSPIRATION_ID = "REPLACE_WITH_ACTUAL_ID";
 
 export default function AiTrendsPage() {
   // Content Inspiration State
@@ -34,14 +38,19 @@ export default function AiTrendsPage() {
   const [refreshLoading, setRefreshLoading] = useState(false);
   const [barChartData, setBarChartData] = useState<Array<{ tag: string; volume: number }>>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpen2, setDialogOpen2] = useState(false);
   const [activeInspiration, setActiveInspiration] = useState<Inspiration | null>(null);
   const [pieChartData, setPieChartData] = useState<Array<{ domain: string; value: number; fill: string }>>([]);
   const [pieChartConfig, setPieChartConfig] = useState<Record<string, { label: string; color?: string }> & { value: { label: string } }>({ value: { label: "Mentions" } });
+  const [ideas, setIdeas] = useState<ContentIdea[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [generateLoading, setGenerateLoading] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
     async function fetchInspiration() {
       setInspirationLoading(true);
-      const supabase = createClient();
       const { data, error } = await supabase
         .from('content_inspiration')
         .select('*')
@@ -123,6 +132,7 @@ export default function AiTrendsPage() {
       setInspirationLoading(false);
     }
     fetchInspiration();
+    fetchIdeas();
   }, []);
 
   // Helper to check if 24 hours have passed
@@ -207,6 +217,47 @@ export default function AiTrendsPage() {
     }
   }
 
+  // Fetch all content_ideas for the current inspiration
+  const fetchIdeas = async () => {
+    setLoading(true);
+    try {
+      const { data } = await supabase
+        .from('content_ideas')
+        .select('*')
+      setIdeas(data || []);
+    } catch (err) {
+      console.error('Failed to fetch ideas', err);
+      setIdeas([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle idea generation
+  const handleGenerate = async (selectedPlatforms: string[]) => {
+    setGenerateLoading(true);
+    try {
+      await fetch("/api/v1/ideas/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inspirationId: activeInspiration?.id, platforms: selectedPlatforms })
+      });
+      setDialogOpen(false);
+      await fetchIdeas();
+    } catch (err) {
+      console.error('Failed to generate ideas', err);
+    } finally {
+      setGenerateLoading(false);
+    }
+  };
+
+  // Handle row click to navigate to detail page
+  const handleRowClick = (idea: ContentIdea) => {
+    if (idea && idea.id) {
+      router.push(`/ai-trends/${idea.id}`);
+    }
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar variant="inset" />
@@ -255,9 +306,7 @@ export default function AiTrendsPage() {
               ) : inspiration.length === 0 ? (
                 null
               ) : (
-                inspiration.map((item, index) => {
-                  const ideaId = item.id
-                  return (
+                inspiration.map((item, index) => 
                     <Card
                       key={index}
                       className="gap-2 cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-xl"
@@ -275,24 +324,30 @@ export default function AiTrendsPage() {
                         <div className="text-sm text-muted-foreground mb-4">
                           {item.description.length > 120 ? item.description.slice(0, 120) + '…' : item.description}
                         </div>
-                        <Link href={`/ai-trends/${ideaId}`} passHref legacyBehavior>
+                        
                           <Button
                             variant="outline"
                             className="w-full"
-                            onClick={e => e.stopPropagation()}
+                            onClick={e => {
+                              e.stopPropagation();
+                              setActiveInspiration(item);
+                              setDialogOpen2(true);                                
+                            }}
                           >
                             <LightbulbIcon className="mr-2 h-4 w-4" />
                             Generate Content Ideas
                           </Button>
-                        </Link>
+
                       </CardContent>
                     </Card>
-                  );
-                })
+                  )
               )}
             </div>
-
-            <DataTable data={data} />
+            <ContentIdeasTable
+              data={ideas}
+              loading={loading}
+              onRowClick={handleRowClick}
+            />
             <div className="flex gap-4 px-4 lg:px-6">
               <div className="basis-1/2">
                 <ChartPieDonut data={pieChartData} config={pieChartConfig} />
@@ -334,6 +389,12 @@ export default function AiTrendsPage() {
           )}
         </DialogContent>
       </Dialog>
+      <PlatformSelectionDialog
+        open={dialogOpen2}
+        onOpenChange={setDialogOpen2}
+        onGenerate={handleGenerate}
+        loading={generateLoading}
+      />
     </SidebarProvider>
   );
 } 
