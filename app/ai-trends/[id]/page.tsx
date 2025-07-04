@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { Badge } from '@/components/ui/badge';
@@ -7,9 +7,10 @@ import { SiteHeader } from '@/components/site-header';
 import { AppSidebar } from '@/components/sidebar/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { ArrowUpRight, Download, Star } from 'lucide-react';
+import { ArrowUpRight, Download, Star, MessageCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { usePDFGenerator } from '@/utils/pdfGenerator';
+import ChatWithAI, { ContentIdea as ChatContentIdea } from '@/components/ui/chat-with-ai';
 
 // Types for content_ideas and content_inspiration
 interface ContentIdea {
@@ -240,7 +241,7 @@ export default function ContentIdeaDetailPage() {
                         <h2 className="text-xl font-semibold mb-2">Similar Ideas</h2>
                     <div className="overflow-x-auto">
                         <div className="flex gap-4 pb-4" style={{ minWidth: 'max-content' }}>
-                            {similarIdeas.map((similarIdea: any, index: number) => (
+                            {similarIdeas.map((similarIdea: ContentIdea) => (
                                 <div key={similarIdea.id} className="w-80 flex-shrink-0 border rounded-lg p-4 hover:shadow-md transition-shadow">
                                     <div className="flex items-center justify-between mb-2">
                                         <h3 className="font-semibold text-sm truncate">{similarIdea.title}</h3>
@@ -288,8 +289,26 @@ export default function ContentIdeaDetailPage() {
                             </DialogHeader>
                         </DialogContent>
                     </Dialog>
+                    {idea && <FloatingChatButton idea={idea} />}
                 </div>
             </SidebarInset>
         </SidebarProvider>
+    );
+}
+
+// Floating Chat Button and modal state
+function FloatingChatButton({ idea }: { idea: ChatContentIdea }) {
+    const [open, setOpen] = useState(false);
+    return (
+        <>
+            <button
+                className="fixed bottom-6 right-6 z-50 bg-primary text-white rounded-full shadow-lg p-4 hover:bg-primary/90 focus:outline-none"
+                onClick={() => setOpen(true)}
+                aria-label="Chat with AI"
+            >
+                <MessageCircle className="w-6 h-6" />
+            </button>
+            <ChatWithAI idea={idea} open={open} setOpen={setOpen} />
+        </>
     );
 }
