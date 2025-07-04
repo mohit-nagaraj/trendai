@@ -1,36 +1,169 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TrendPilot: Social Content Intelligence Platform
 
-## Getting Started
+[![GitHub Repo](https://img.shields.io/badge/GitHub-doudoujay/mohit-blue?logo=github)](https://github.com/doudoujay/mohit)
 
-First, run the development server:
+## Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+**TrendPilot** is a full-stack, AI-powered platform for analyzing social media content performance, surfacing emerging trends, and generating actionable content ideas. Built as part of a strategic work trial for Final Round AI, it combines robust analytics, trend intelligence, and ideation tools to empower marketers and creators.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This project was developed as a 7-day challenge to demonstrate the ability to independently assess social media performance, identify trends, and generate marketing ideas, with a focus on real-world deliverables and extensibility.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Table of Contents
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [Features](#features)
+- [Project Phases & Unique Additions](#project-phases--unique-additions)
+- [Architecture](#architecture)
+- [Setup & Installation](#setup--installation)
+- [Usage](#usage)
+- [Demo Account](#demo-account)
+- [Work Trial Context](#work-trial-context)
+- [Extending the Platform](#extending-the-platform)
+- [Contributing](#contributing)
+- [License](#license)
 
-## Learn More
+## Features
 
-To learn more about Next.js, take a look at the following resources:
+- **Authentication & Secure Access**: Supabase-powered login/logout, protected routes, and middleware.
+- **Content Upload & Processing**: Upload CSVs, validate, deduplicate, and store content with metrics.
+- **AI Analysis Pipeline**: Integrates Gemini 2.5 for content analysis, performance metrics, and insight generation.
+- **Performance Dashboard**: Visualizes aggregate and post-level metrics with interactive charts.
+- **Trend Intelligence System**: Tracks, scores, and displays trends from multiple sources, with AI-powered relevance.
+- **Content Ideation Engine**: Generates content ideas, hooks, and visual styles, with performance predictions.
+- **PDF Export**: Export generated ideas for sharing or reporting.
+- **Command Palette**: Quick navigation and actions via Ctrl+K.
+- **Modern UI**: Built with reusable, accessible components and responsive design.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Phases & Unique Additions
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project was developed in well-defined phases, each with clear deliverables. Beyond the initial scope, several unique features and improvements were added to enhance usability and insight generation.
 
-## Deploy on Vercel
+### Phase 1: Foundation & Authentication (MVP Core) ✅
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Next.js + TypeScript setup
+- Supabase integration (DB + Auth)
+- Authentication flow (login/logout)
+- Routing structure
+- UI components and pages (with dummy data)
+- Database schema
+- Protected route middleware
+- **Command Palette (Ctrl+K) for quick search and navigation** ← _unique addition_
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Phase 2: Content Upload & Processing (MVP Content) ✅
+
+- File upload with CSV validation
+- CSV parsing, data extraction, and duplicate detection
+- Content storage in DB (metrics, video scrape, upload)
+- Processing status tracking
+- Dashboard view for imported content
+
+### Phase 3: AI Analysis Pipeline (MVP Intelligence) ✅
+
+- Gemini AI service integration (Gemini 2.5)
+- Content analysis pipeline
+- Performance metric calculations
+- AI insight storage and retrieval
+- Insight display on frontend
+
+### Phase 4: Performance Dashboard (MVP Visualization) ✅
+
+- Aggregate metrics calculation
+- Chart components (viewers)
+- Detailed post analysis views
+
+### Phase 5: Trend Intelligence System (MVP Trends) ✅
+
+- Trend fetching from multiple sources
+- 24-hour refresh logic
+- AI-powered relevance scoring
+- Trend storage and management
+- Trend dashboard page
+- Manual refresh capability
+
+### Phase 6: Content Ideation Engine (MVP Ideas) ✅
+
+- Content idea generation pipeline
+- Hook and visual style suggestions
+- Performance prediction model
+- Idea storage and organization
+- Detailed idea view with rationale
+- Integration with trend data
+
+### Further Enhancements
+
+- **PDF export of ideas** ← _unique addition_
+- **"View similar" feature to gather related ideas** ← _unique addition_
+- **Planned: AI chat for content ideation, agent-based idea improvement** ← _unique roadmap_
+
+## Architecture
+
+- **Frontend**: Next.js (App Router), TypeScript, modular UI components, responsive design.
+- **Backend/API**: Next.js API routes, Supabase for database and authentication.
+- **AI Integration**: Gemini 2.5 for content analysis and ideation.
+- **Data Processing**: CSV parsing, duplicate detection, and metrics calculation.
+- **Visualization**: Custom chart components for analytics and trends.
+- **State Management**: React context and hooks.
+- **Security**: Protected routes, Supabase auth, middleware.
+
+### Directory Structure
+
+- `app/` — Next.js app directory (pages, API routes, middleware)
+- `components/` — UI and visualization components
+- `lib/` — Utility libraries (AI, analytics, ingestion, queue)
+- `hooks/` — Custom React hooks
+- `utils/` — CSV, PDF, and Supabase utilities
+
+## Setup & Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/doudoujay/mohit.git
+   cd mohit
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Configure environment variables:**
+   - Copy `.env.example` to `.env` and fill in your Supabase and AI API keys.
+
+4. **Run database migrations:**
+   - Ensure your Supabase project is set up and run the SQL in `supabase/migrations/`.
+
+5. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+
+6. **Open [http://localhost:3000](http://localhost:3000) in your browser.**
+
+## Usage
+
+- **Login** with your Supabase credentials (or use the demo account below).
+- **Upload content** via CSV to analyze social posts.
+- **View dashboards** for performance metrics and insights.
+- **Explore trends** and generate new content ideas.
+- **Export ideas** as PDF for sharing.
+- **Use the command palette (Ctrl+K)** for fast navigation and actions.
+
+## Extending the Platform
+
+- **AI Chat for Ideation**: Planned feature for interactive idea refinement.
+- **Agent-based Content Improvement**: Roadmap for autonomous idea enhancement.
+- **Additional Trend Sources**: Easily add new APIs or scrapers.
+- **Custom Analytics**: Extend charting and metrics as needed.
+
+## Contributing
+
+Contributions are welcome! Please open issues or pull requests for improvements, bug fixes, or new features.
+
+## License
+
+[MIT](LICENSE)
+
+---
+
+**_Built with ❤️ for the Final Round AI work trial. For questions or demo requests, contact [repo owner](https://github.com/doudoujay)._**
