@@ -330,7 +330,7 @@ export default function AiTrendsPage() {
                         
                           <Button
                             variant="outline"
-                            className="w-full"
+                            className="w-full cursor-pointer"
                             onClick={e => {
                               e.stopPropagation();
                               setActiveInspiration(item);

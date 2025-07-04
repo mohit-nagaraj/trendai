@@ -115,7 +115,7 @@ export function ContentIdeasTable({ data, loading = false, onRowClick }: Content
                 <TableCell>{idea.content_type || '-'}</TableCell>
                 <TableCell>{idea.created_at ? new Date(idea.created_at).toLocaleString() : '-'}</TableCell>
                 <TableCell>
-                  <Star color={idea.is_starred ? '#EED202' : '#000'} fill={idea.is_starred ? '#EED202' : 'transparent'} strokeWidth={idea.is_starred ? 0 : 1} className='w-4 h-4' />
+                  <Star color={idea.is_starred ? '#EED202' : '#1a1919'} fill={idea.is_starred ? '#EED202' : 'transparent'} strokeWidth={idea.is_starred ? 0 : 1} className='w-4 h-4' />
                 </TableCell>
               </TableRow>
             ))
