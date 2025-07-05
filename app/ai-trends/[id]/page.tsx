@@ -11,6 +11,7 @@ import { ArrowUpRight, Download, Star, MessageCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { usePDFGenerator } from '@/utils/pdfGenerator';
 import ChatWithAI, { ContentIdea as ChatContentIdea } from '@/components/chat-with-ai';
+import { toast } from 'sonner';
 
 // Types for content_ideas and content_inspiration
 interface ContentIdea {
@@ -30,6 +31,7 @@ interface ContentIdea {
     is_starred?: boolean;
     created_at?: string;
     updated_at?: string;
+    generated?: string[];
 }
 
 interface ContentInspiration {
@@ -55,6 +57,9 @@ export default function ContentIdeaDetailPage() {
     const [error, setError] = useState<string | null>(null);
     const [isStarred, setIsStarred] = useState(false);
     const [showInspirationDialog, setShowInspirationDialog] = useState(false);
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [activeImage, setActiveImage] = useState<string | null>(null);
+    const [imageLoading, setImageLoading] = useState(false);
     const supabase = createClient();
     const { generatePDF, isGenerating, error: pdfError } = usePDFGenerator();
 
@@ -147,6 +152,33 @@ export default function ContentIdeaDetailPage() {
         }
     };
 
+    const handleGenerateImage = async () => {
+        if (!idea) return;
+        setImageLoading(true);
+        try {
+            const res = await fetch('/api/v1/ideas/generate-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: idea.id }),
+            });
+            const data = await res.json();
+            console.log("image data",data)
+            // Refetch idea to get updated generated array
+            const { data: updatedIdea } = await createClient()
+                .from('content_ideas')
+                .select('*')
+                .eq('id', idea.id)
+                .single();
+            setIdea(updatedIdea);
+            setIsStarred(updatedIdea.is_starred)
+        } catch (err: any) {
+            toast.error("Error generating image")
+            console.log(err)
+        } finally {
+            setImageLoading(false);
+        }
+    };
+
     if (loading) {
         return (
             <SidebarProvider>
@@ -232,11 +264,41 @@ export default function ContentIdeaDetailPage() {
                                 <div className="mb-2"> {idea.tags.map((tag: string, i: number) => <Badge key={i} className="ml-1">{tag.startsWith('#') ? tag : `#${tag}`}</Badge>)}</div>
                             )}
                         </div>
-                        <div className='flex justify-end'>
+                        {idea && Array.isArray(idea.generated) && idea.generated.length > 0 && (
+                        <div className="mt-8">
+                            <h3 className="text-lg font-semibold mb-2">Generated Images</h3>
+                            <div className="flex gap-4 flex-wrap">
+                                {idea.generated.map((img: string, idx: number) => (
+                                    <div key={idx} className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden cursor-pointer border border-gray-200 flex items-center justify-center" onClick={() => { setActiveImage(img); setShowImageModal(true); }}>
+                                        <img src={img} alt={`Generated ${idx + 1}`} className="object-cover w-full h-full" />
+                                    </div>
+                                ))}
+                            </div>
+                            <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
+                                <DialogContent className="max-w-xl w-full flex flex-col items-center">
+                                    {activeImage && (
+                                        <>
+                                            <img src={activeImage} alt="Generated Preview" className="w-full max-h-[60vh] object-contain mb-4" />
+                                            <a href={activeImage} download target="_blank" rel="noopener noreferrer">
+                                                <Button variant="outline" className="flex items-center gap-2">
+                                                    <Download className="w-4 h-4" /> Download Image
+                                                </Button>
+                                            </a>
+                                        </>
+                                    )}
+                                </DialogContent>
+                            </Dialog>
+                        </div>
+                    )}
+                        <div className='flex justify-end gap-2'>
+                            <Button variant="outline" size="sm" className='text-primary cursor-pointer' onClick={handleGenerateImage} disabled={imageLoading}>
+                                {imageLoading ? 'Generating...' : 'Generate Image'}
+                            </Button>
                             <Button variant="outline" size="sm" className='text-gray-700 cursor-pointer' onClick={() => setShowInspirationDialog(true)}>
                                 View Inspiration Details
                             </Button>
                         </div>
+                        
                         <hr className="my-6" />
                         <h2 className="text-xl font-semibold mb-2">Similar Ideas</h2>
                     <div className="overflow-x-auto">
@@ -290,6 +352,7 @@ export default function ContentIdeaDetailPage() {
                         </DialogContent>
                     </Dialog>
                     {idea && <FloatingChatButton idea={idea} refreshIdea={refreshIdea} />}
+                    
                 </div>
             </SidebarInset>
         </SidebarProvider>
