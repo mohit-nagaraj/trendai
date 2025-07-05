@@ -189,3 +189,23 @@
     font-family: "Montserrat", system-ui, -apple-system;
   }
 }
+
+/* Fixed keyframes - remove the asterisks */
+@keyframes scroll-vertical {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+/* Add animation class */
+.animate-scroll-vertical {
+  animation: scroll-vertical 30s linear infinite;
+}
+
+/* Pause animation on hover */
+.animate-scroll-vertical:hover {
+  animation-play-state: paused;
+}

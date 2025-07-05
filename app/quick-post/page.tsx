@@ -158,16 +158,26 @@ export default function QuickPostPage() {
           <span className="text-xs text-gray-400 ml-2">Last scraped: {lastFetched.toLocaleString()}</span>
         )}
       </div>
-      <div className="flex flex-col items-center justify-center gap-2">
-        {pills.map((pill) => (
-          <Badge
-            key={pill.id}
-            className="cursor-pointer bg-primary/10 border-primary/50 text-gray-800 text-[12px] px-2 py-1"
-            onClick={() => handlePillClick(pill)}
-          >
-            {pill.title.length > 50 ? pill.title.slice(0, 50) + '...' : pill.title}
-          </Badge>
-        ))}
+      <div className="relative h-80 w-full overflow-hidden flex flex-col items-center justify-center mb-8">
+        <div
+          className="flex flex-col justify-center items-center gap-2 animate-scroll-vertical"
+          style={{ height: 'auto', minHeight: '200%', willChange: 'transform' }}
+          onMouseEnter={e => (e.currentTarget.style.animationPlayState = 'paused')}
+          onMouseLeave={e => (e.currentTarget.style.animationPlayState = 'running')}
+        >
+          {[...pills, ...pills].map((pill, idx) => (
+            <Badge
+              key={pill.id + '-' + idx}
+              className="cursor-pointer bg-primary/10 border-primary/50 text-gray-800 text-[12px] px-2 py-1 transition-transform hover:scale-105"
+              onClick={() => handlePillClick(pill)}
+            >
+              {pill.title.length > 50 ? pill.title.slice(0, 50) + '...' : pill.title}
+            </Badge>
+          ))}
+        </div>
+        {/* Gradient mask for top/bottom fade */}
+        <div className="pointer-events-none absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-[#fffcf4]/95 to-transparent z-10" />
+<div className="pointer-events-none absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-[#fffcf4]/95 to-transparent z-10" />
       </div>
       {/* Chat UI */}
       <div className="mt-8">
@@ -182,7 +192,7 @@ export default function QuickPostPage() {
         )}
         {tweet && (
             <div className="flex flex-col items-end mb-2">
-            <div className="bg-primary text-primary-foreground rounded-lg px-4 py-3 max-w-xs shadow chat-bubble">
+            <div className="bg-primary text-primary-foreground rounded-lg px-4 py-3 shadow chat-bubble">
               {tweet}
             </div>
             {!tweetPosted ? (
