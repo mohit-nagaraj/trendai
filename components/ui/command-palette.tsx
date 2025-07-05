@@ -5,9 +5,11 @@ import { Command } from "cmdk";
 import { useCommandPalette } from "@/context/CommandPaletteContext";
 
 const ROUTES = [
+  { label: "Quick Sync", value:"/"},
   { label: "Dashboard", value: "/dashboard" },
   { label: "AI Analysis", value: "/ai-analysis" },
   { label: "AI Trends", value: "/ai-trends" },
+  { label: "Quick Post", value:"/quick-post"},
   { label: "Videos & Images", value: "/content" },
   { label: "Team", value: "/team" },
   { label: "File Uploads", value: "/file-uploads" }

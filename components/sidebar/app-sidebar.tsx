@@ -2,6 +2,7 @@
 import * as React from "react";
 import Image from "next/image";
 import {
+  BadgeCheck,
   BarChartIcon,
   DatabaseIcon,
   FolderIcon,
@@ -46,6 +47,11 @@ const data = {
       title: "AI Trends",
       url: "/ai-trends",
       icon: BarChartIcon,
+    },
+    {
+      title: "Quick Post",
+      url: "/quick-post",
+      icon: BadgeCheck,
     },
   ],
   collaboration: [
