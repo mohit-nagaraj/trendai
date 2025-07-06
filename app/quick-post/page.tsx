@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Pill {
   id: string;
@@ -12,8 +13,8 @@ interface Pill {
   description?: string;
   content?: string;
   url?: string;
-  urlToImage?: string;
-  publishedAt?: string;
+  urltoimage?: string;
+  publishedat?: string;
   source?: string;
   created_at?: string;
 }
@@ -30,6 +31,7 @@ export default function QuickPostPage() {
   const [tweetPosted, setTweetPosted] = useState(false);
   const [scrapeLoading, setScrapeLoading] = useState(false);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
+  const [generateImage, setGenerateImage] = useState<boolean>(false);
 
   // Fetch user display name
   useEffect(() => {
@@ -114,7 +116,7 @@ export default function QuickPostPage() {
       const res = await fetch("/api/v1/quick-post/post-to-twitter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tweet }),
+        body: JSON.stringify({ tweet, generateImage, url: selectedPill?.urltoimage }),
       });
       const data = await res.json();
       if (data.tweet) {
@@ -196,6 +198,10 @@ export default function QuickPostPage() {
               {tweet}
             </div>
             {!tweetPosted ? (
+              <div className="flex justify-between w-full">
+                {selectedPill?.urltoimage?<div className="mt-2 text-[12px] flex items-center gap-2">
+                  <Checkbox checked={generateImage} onCheckedChange={() => setGenerateImage(prev=>!prev)} className="w-4 h-4"/> <div className="">Generate Image?</div>
+                </div>:<div></div>}
                 <button
                 className="mt-2 bg-green-600 text-white rounded px-4 py-1 font-semibold hover:bg-green-700"
                 onClick={handlePostTweet}
@@ -203,12 +209,13 @@ export default function QuickPostPage() {
                 >
                 {tweetLoading ? "Posting..." : "Yes, post to Twitter"}
               </button>
+                  </div>
             ) : (
                 <div className="mt-2 text-green-600 font-semibold">Tweet posted!</div>
             )}
           </div>
         )}
-        {tweetLoading && <div className="mb-2">Generating tweet...</div>}
+        {tweetLoading && <div className="mb-2">Making magic...</div>}
         {tweetError && <div className="text-red-600 mb-2">{tweetError}</div>}
       </div>
     </div>

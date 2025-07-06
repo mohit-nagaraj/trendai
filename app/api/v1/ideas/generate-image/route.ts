@@ -54,7 +54,7 @@ async function overlayLogo(imageBuffer, logoPath) {
     const { width, height } = await sharp(imageBuffer).metadata();
     
     // Calculate logo size (10% of image width, max 150px)
-    const logoSize = Math.min(Math.floor(width * 0.1), 150);
+    const logoSize = Math.min(Math.floor(width * 0.15), 150);
     
     // Position logo in top-right corner with 20px margin
     const logoLeft = width - logoSize - 20;
