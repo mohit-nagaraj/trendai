@@ -179,6 +179,28 @@ export default function ContentIdeaDetailPage() {
         }
     };
 
+    const handleDownloadImage = async (url: string, idx: number) => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = `generated_image_${idx + 1}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (err: unknown) {
+            // Optionally show a toast or error
+            if (err instanceof Error) {
+                console.error('Failed to download image', err.message);
+            } else {
+                console.error('Failed to download image', err);
+            }
+        }
+    };
+
     if (loading) {
         return (
             <SidebarProvider>
@@ -279,11 +301,9 @@ export default function ContentIdeaDetailPage() {
                                     {activeImage && (
                                         <>
                                             <img src={activeImage} alt="Generated Preview" className="w-full max-h-[60vh] object-contain mb-4" />
-                                            <a href={activeImage} download target="_blank" rel="noopener noreferrer">
-                                                <Button variant="outline" className="flex items-center gap-2">
-                                                    <Download className="w-4 h-4" /> Download Image
-                                                </Button>
-                                            </a>
+                                            <Button variant="outline" className="flex items-center gap-2" onClick={() => handleDownloadImage(activeImage, idea?.generated?.indexOf(activeImage) ?? 0)}>
+                                                <Download className="w-4 h-4" /> Download Image
+                                            </Button>
                                         </>
                                     )}
                                 </DialogContent>
