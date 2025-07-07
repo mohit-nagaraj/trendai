@@ -171,7 +171,6 @@ export async function analyzeContentWithGemini(contentPost: ContentPost): Promis
       ];
     } else {
       console.log(`[Gemini] Using File API for media (>20MB)`);
-      // @ts-expect-error: No types for tmp-promise
       const tmp = await import('tmp-promise');
       const fs = await import('fs/promises');
       let ext = 'bin';

@@ -26,7 +26,7 @@ function extractPlatformAndId(url: string) {
   // Extract filename from URL
   const filename = url.split('/').pop() || '';
   // Regex to match platform_id.ext format
-  const match = filename.match(/^(instagram|tiktok)_(\d+)\./);
+  const match = filename.match(/^(instagram|tiktok|custom)_(\d+)\./);
   if (match) {
     return {
       platform: match[1],

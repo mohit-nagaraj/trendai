@@ -10,7 +10,7 @@ const BUCKET = 'final-round-ai-files';
 const FOLDER = 'videos';
 
 // Helper function to build optimized prompt for Imagen 3
-function buildImagen3Prompt(idea) {
+function buildImagen3Prompt(idea:any) {
   const prompt = `Professional ${idea.content_type.toLowerCase()} design for ${idea.platform} social media.
 
 CONTENT: "${idea.title}"
@@ -46,7 +46,7 @@ function buildLogoDescription() {
 }
 
 // Function to overlay logo on generated image
-async function overlayLogo(imageBuffer, logoPath) {
+async function overlayLogo(imageBuffer:any, logoPath:any) {
   try {
     const logoBuffer = fs.readFileSync(logoPath);
     
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
 
       // Get the first generated image
       const generatedImage = response.generatedImages[0];
-      imageBuffer = Buffer.from(generatedImage.image.imageBytes, 'base64');
+      imageBuffer = Buffer.from(String((generatedImage.image && generatedImage.image.imageBytes) || ''), 'base64');
       
       // Overlay logo on the generated image
       imageBuffer = await overlayLogo(imageBuffer, logoPath);
@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
         if (part.text) {
           generatedText = part.text;
         } else if (part.inlineData) {
-          imageBuffer = Buffer.from(part.inlineData.data, 'base64');
+          imageBuffer = Buffer.from(part.inlineData.data ?? '', 'base64');
         }
       }
     }

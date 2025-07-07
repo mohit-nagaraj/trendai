@@ -80,7 +80,7 @@ export async function POST(req: Request) {
       if (geminiResponse?.candidates && geminiResponse.candidates[0]?.content?.parts) {
         for (const part of geminiResponse.candidates[0].content.parts) {
           if (part.inlineData) {
-            imageBuffer = Buffer.from(part.inlineData.data, 'base64');
+            imageBuffer = Buffer.from(part.inlineData.data??"", 'base64');
           }
         }
       }

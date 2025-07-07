@@ -29,25 +29,36 @@ function formatNumber(num: number): string {
 
 export async function generateAnalyticsCards(): Promise<AnalyticsCardsResponse> {
   const supabase = await createClient();
+  console.log('[Analytics] Supabase client created');
   
   // Get all posts data
   const { data: posts, error } = await supabase
     .from('content_posts')
     .select('*');
-
   if (error || !posts || posts.length === 0) {
+    console.error('[Analytics] Failed to fetch posts for analytics:', error?.message || 'No posts found');
     throw new Error(`Failed to fetch posts for analytics: ${error?.message || 'No posts found'}`);
   }
+  console.log(`[Analytics] Fetched ${posts.length} posts`);
 
   // Get historical data for comparison (last 90 days before current batch)
   const currentBatchDate = new Date();
   const historicalStartDate = new Date(currentBatchDate.getTime() - (90 * 24 * 60 * 60 * 1000));
-  
-  const { data: historicalPosts } = await supabase
-    .from('content_posts')
-    .select('engagement_rate, likes, reach, platform, follows')
-    .gte('created_at', historicalStartDate.toISOString())
-    .lt('created_at', currentBatchDate.toISOString());
+  let historicalPosts: any[] = [];
+  try {
+    const { data: histData, error: histError } = await supabase
+      .from('content_posts')
+      .select('engagement_rate, likes, reach, platform, follows')
+      .gte('created_at', historicalStartDate.toISOString())
+      .lt('created_at', currentBatchDate.toISOString());
+    if (histError) {
+      console.error('[Analytics] Error fetching historical posts:', histError.message);
+    }
+    historicalPosts = histData || [];
+    console.log(`[Analytics] Fetched ${historicalPosts.length} historical posts`);
+  } catch (err) {
+    console.error('[Analytics] Exception fetching historical posts:', err);
+  }
 
   // Calculate metrics
   const totalPosts = posts.length;
@@ -114,16 +125,12 @@ export async function generateAnalyticsCards(): Promise<AnalyticsCardsResponse> 
     // Use publish_time instead of created_at for actual post date
     const publishTime = post.publish_time || post.created_at;
     if (!publishTime) continue;
-    
     const date = new Date(publishTime).toISOString().slice(0, 10); // YYYY-MM-DD
-    
     if (!datePlatformMap[date]) {
       datePlatformMap[date] = {};
     }
-    
     // Use views instead of reach for chart data
     const viewCount = post.views || 0;
-    
     if (post.platform === 'instagram') {
       datePlatformMap[date].instagram = (datePlatformMap[date].instagram || 0) + viewCount;
     } else if (post.platform === 'tiktok') {
@@ -133,6 +140,7 @@ export async function generateAnalyticsCards(): Promise<AnalyticsCardsResponse> 
 
   // Get only the dates that have actual data (no interpolation between gaps)
   const actualDates = Object.keys(datePlatformMap).sort();
+  console.log(`[Analytics] Chart data will be generated for ${actualDates.length} dates`);
 
   if (actualDates.length > 0) {
     // Build chart data only for dates with actual posts
@@ -141,19 +149,26 @@ export async function generateAnalyticsCards(): Promise<AnalyticsCardsResponse> 
       instagram: datePlatformMap[date]?.instagram || 0,
       tiktok: datePlatformMap[date]?.tiktok || 0,
     }));
-
-    // Delete all previous data
-    await supabase.from('analytics_chart_data').delete().neq('date', '');
-    console.log("Deleted all previous datas")
-    
-    // Insert new data (in batches if needed)
-    for (let i = 0; i < chartData.length; i += 500) {
-      const batch = chartData.slice(i, i + 500);
-      const { error: insertError } = await supabase.from('analytics_chart_data').insert(batch);
-      if (insertError) {
-        throw new Error('Failed to insert chart data: ' + insertError.message);
+    try {
+      // Use upsert on 'date' as the primary key
+      for (let i = 0; i < chartData.length; i += 500) {
+        const batch = chartData.slice(i, i + 500);
+        const { error: upsertError } = await supabase
+          .from('analytics_chart_data')
+          .upsert(batch, { onConflict: 'date' });
+        if (upsertError) {
+          console.error('[Analytics] Failed to upsert chart data batch:', upsertError.message);
+          throw new Error('Failed to upsert chart data: ' + upsertError.message);
+        } else {
+          console.log(`[Analytics] Upserted chart data batch: ${i} - ${i + batch.length - 1}`);
+        }
       }
+    } catch (err) {
+      console.error('[Analytics] Exception during chart data upsert:', err);
+      throw err;
     }
+  } else {
+    console.log('[Analytics] No chart data to upsert');
   }
 
   return {
