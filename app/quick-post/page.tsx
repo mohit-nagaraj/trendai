@@ -6,6 +6,8 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface Pill {
   id: string;
@@ -32,6 +34,7 @@ export default function QuickPostPage() {
   const [scrapeLoading, setScrapeLoading] = useState(false);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
   const [generateImage, setGenerateImage] = useState<boolean>(false);
+  const [hardMode, setHardMode] = useState<boolean>(true);
 
   // Fetch user display name
   useEffect(() => {
@@ -93,11 +96,13 @@ export default function QuickPostPage() {
       const res = await fetch("/api/v1/quick-post/generate-tweet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pill }),
+        body: JSON.stringify({ pill, hard_mode: hardMode }),
       });
       const data = await res.json();
       if (data.tweet) {
         setTweet(data.tweet);
+      } else if (data.error === "not_processable") {
+        setTweetError("This news is not relevant enough for a post");
       } else {
         setTweetError("Failed to generate tweet");
       }
@@ -141,7 +146,18 @@ export default function QuickPostPage() {
         <AppSidebar variant="inset" />
         <SidebarInset>
           <SiteHeader title="Quick Post" />
-    <div className="max-w-xl mx-auto py-10 px-4 flex flex-col items-center justify-center h-full">
+        {/* Mode Switch - Top Right */}
+      <div className="absolute top-[7%] right-4 flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-lg p-2 shadow-sm border">
+        <Label htmlFor="mode-switch" className="text-xs font-medium text-gray-600">Subtle</Label>
+        <Switch
+          id="mode-switch"
+          checked={hardMode}
+          onCheckedChange={setHardMode}
+        />
+        <Label htmlFor="mode-switch" className="text-xs font-medium text-gray-600">Hard</Label>
+      </div>
+    <div className="max-w-xl mx-auto py-10 px-4 flex flex-col items-center justify-center h-full relative">
+      
       <h1 className="text-5xl mb-2">Hello, {name}!</h1>
       <h3 className="text-gray-500 mb-8">What tweet are we posting today?</h3>
       <div className="mb-4 flex items-center gap-4">

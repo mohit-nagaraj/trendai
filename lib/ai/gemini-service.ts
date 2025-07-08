@@ -99,8 +99,60 @@ Final Round AI is an AI‑powered interview coach and career accelerator that gu
 - Mock Interviews & Question Bank: industry‑specific practice with customizable Q&A and performance analytics
 - Coding Copilot: live coding help during technical interviews (debugging, pattern hints)
 - Post‑Interview Reports: evaluation of strengths, areas to improve, confidence metrics, and sentiment breakdown
+
 Target audience: Early to mid‑career tech professionals—software engineers, data scientists, product managers, and tech-savvy career changers—especially those preparing for high‑stakes interviews at top companies.
-Brand personality: Professional, empowering, and tech‑driven—balancing polished, ATS‑grade visuals and UI with trustworthy support. It positions itself as both a mentor and a stealthy backstage coach, blending human mentorship with AI efficiency.
+
+Brand personality: Professional, empowering, and tech‑driven—balancing polished, ATS‑grade visuals and UI with trustworthy support. It positions itself as both a mentor and a stealthy backstage coach, blending human mentorship with AI efficiency. The brand embraces relatability and humor when it connects with the tech community's experiences (coding struggles, interview anxiety, workplace memes) while maintaining credibility and expertise.
+
+CONTENT EVALUATION CRITERIA:
+Professional + Humorous content is ENCOURAGED when it:
+- Uses tech/workplace humor that resonates with the target audience
+- Makes interview/career topics more approachable and relatable
+- Maintains brand authority while being entertaining
+- Uses memes, trending formats, or casual language that tech professionals understand
+- Addresses common pain points with levity (interview anxiety, coding bugs, workplace situations)
+
+Content should be scored LOWER only when it:
+- Is completely off-topic from career/interview/tech themes
+- Uses inappropriate humor that could damage professional credibility
+- Lacks any educational or relatable value for the target audience
+- Contradicts the brand's core mission of helping people succeed in their careers
+
+SCORING GUIDELINES (to ensure consistency):
+Use these benchmarks for 1-10 scores:
+
+Hook Effectiveness:
+- 9-10: Immediately grabs attention, highly relevant to audience pain points, clear value proposition
+- 7-8: Strong opening, good relevance, clear direction
+- 5-6: Decent opening, somewhat relevant, could be stronger
+- 3-4: Weak opening, limited relevance, unclear value
+- 1-2: Poor opening, irrelevant, confusing or off-putting
+
+Visual Appeal:
+- 9-10: Professional quality, excellent composition, highly engaging visuals
+- 7-8: Good quality, well-composed, engaging
+- 5-6: Adequate quality, acceptable composition
+- 3-4: Below average quality, poor composition
+- 1-2: Poor quality, distracting or unprofessional
+
+Brand Consistency:
+- 9-10: Perfect alignment with brand values, tone, and visual identity
+- 7-8: Strong alignment, minor inconsistencies
+- 5-6: Generally consistent, some disconnect
+- 3-4: Inconsistent messaging or visuals
+- 1-2: Completely off-brand
+
+Target Audience Alignment:
+- 9-10: Perfectly addresses audience needs/interests, highly relatable
+- 7-8: Strong relevance, good understanding of audience
+- 5-6: Somewhat relevant, general appeal
+- 3-4: Limited relevance, misses audience needs
+- 1-2: Irrelevant to target audience
+
+Performance Category Guidelines:
+- HIGH: Strong metrics relative to account averages, high engagement rate (>5%), effective content strategy
+- MEDIUM: Average metrics, moderate engagement (2-5%), decent content execution
+- LOW: Below average metrics, low engagement (<2%), content needs significant improvement
 
 ANALYSIS REQUIREMENTS:
 Provide detailed analysis in the following JSON structure:
@@ -108,7 +160,7 @@ Provide detailed analysis in the following JSON structure:
   "content_themes": ["theme1", "theme2", "theme3"],
   "hook_effectiveness": {
     "score": 1-10,
-    "reasoning": "detailed explanation of both text and visual hook strength",
+    "reasoning": "detailed explanation of both text and visual hook strength, considering professional AND humorous elements",
     "suggestions": ["improvement1", "improvement2"]
   },
   "visual_analysis": {
@@ -121,14 +173,14 @@ Provide detailed analysis in the following JSON structure:
   "engagement_drivers": ["driver1", "driver2", "driver3"],
   "target_audience_alignment": {
     "score": 1-10,
-    "reasoning": "how well content matches target audience based on both text and visuals"
+    "reasoning": "how well content matches target audience based on both text and visuals, including appropriate use of humor"
   },
   "performance_category": "high|medium|low",
   "key_insights": ["insight1", "insight2", "insight3"],
   "optimization_suggestions": ["suggestion1", "suggestion2", "suggestion3"]
 }
 
-Focus on actionable insights for improving future content performance, considering both textual and visual elements. Return only valid JSON.
+Focus on actionable insights for improving future content performance, considering both textual and visual elements. Embrace content that successfully balances professionalism with relatability and humor. Return only valid JSON.
 `;
 }
 

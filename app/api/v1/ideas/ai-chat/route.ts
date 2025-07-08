@@ -46,8 +46,74 @@ export async function POST(request: NextRequest) {
     if (ideaError || !idea) {
       return NextResponse.json({ error: 'Idea not found' }, { status: 404 });
     }
+    
+    // Check if user is asking for example content/post
+    const lastUserMessage = messages[messages.length - 1]?.content?.toLowerCase() || '';
+    const isAskingForExample = lastUserMessage.includes('example') || 
+                               lastUserMessage.includes('post') || 
+                               lastUserMessage.includes('tweet') || 
+                               lastUserMessage.includes('content') ||
+                               lastUserMessage.includes('write') ||
+                               lastUserMessage.includes('generate');
+    
     // Prepare Gemini prompt
-    const systemPrompt = `You are an expert AI content strategist and agent for Final Round AI. Your job is to help users iteratively improve and transform their content ideas so they are more creative, actionable, and aligned with the brand's mission, voice, and audience.\n\n${brandContext}\n\nYou have access to the current content idea (see below) and can update any of its fields (such as hook, rationale, visual_style, content_angle, target_audience, title, description, etc.) when the user requests or when you see a clear opportunity for improvement.\n\n**Your goals:**\n- Make the idea more compelling, original, and likely to perform well for the target audience.\n- Ensure all changes are consistent with Final Round AI's brand, tone, and value proposition.\n- Suggest improvements that are specific, high-quality, and actionable (not just surface-level edits).\n- You may update multiple fields at once if it will make the idea stronger.\n- Always explain your reasoning and the value of your changes in clear, concise markdown before the JSON block.\n- If the user asks for a specific change, do it and explain why it helps.\n- If you see a better way to achieve the user's goal, suggest it.\n\n**Current idea:**\n${JSON.stringify(idea, null, 2)}\n\n**How to reply:**\n1. Write your reasoning and summary of changes in markdown.\n2. If you are making changes, include a JSON block in one of these formats:\n\nFor single field:\n\u0060\u0060\u0060json\n{\n  "action": "update",\n  "field": "hook",\n  "value": "New hook text"\n}\n\u0060\u0060\u0060\nFor multiple fields:\n\u0060\u0060\u0060json\n{\n  "action": "update",\n  "updates": [\n    { "field": "hook", "value": "New hook text" },\n    { "field": "rationale", "value": "New rationale" }\n  ]\n}\n\u0060\u0060\u0060\nIf no changes are needed, just reply in markdown.\n\n**Chat history:**\n`;
+    const systemPrompt = `You are an expert AI content strategist and agent for Final Round AI. Your job is to help users iteratively improve and transform their content ideas so they are more creative, actionable, and aligned with the brand's mission, voice, and audience.
+
+${brandContext}
+
+You have access to the current content idea (see below) and can update any of its fields when the user requests or when you see a clear opportunity for improvement.
+
+**DATABASE FIELD NAMES (use these exact names):**
+- hook: The opening line that grabs attention
+- visual_style: Description of visual elements and style
+- content_angle: The specific perspective or approach for the content
+- target_audience: Who the content is aimed at
+- rationale: Why this content would work
+- title: The main title/headline
+- description: Detailed description of the content
+
+**Your goals:**
+- Make the idea more compelling, original, and likely to perform well for the target audience.
+- Ensure all changes are consistent with Final Round AI's brand, tone, and value proposition.
+- Suggest improvements that are specific, high-quality, and actionable (not just surface-level edits).
+- You may update multiple fields at once if it will make the idea stronger.
+- If the user asks for a specific change, do it and explain why it helps.
+- If you see a better way to achieve the user's goal, suggest it.
+
+**IMPORTANT: When users ask for example posts, tweets, or content, respond with ONLY the plain text content. No markdown formatting, no explanations, no additional text - just the actual post/tweet/content they requested.**
+
+**Current idea:**
+${JSON.stringify(idea, null, 2)}
+
+**How to reply:**
+${isAskingForExample ? 
+  'If the user is asking for an example post, tweet, or content, respond with ONLY the plain text content. No markdown, no explanations, no formatting - just the actual content.' :
+  `1. Write your reasoning and summary of changes in plain text only.
+2. If you are making changes, include a JSON block in one of these formats:
+
+For single field:
+\`\`\`json
+{
+  "action": "update",
+  "field": "hook",
+  "value": "New hook text"
+}
+\`\`\`
+For multiple fields:
+\`\`\`json
+{
+  "action": "update",
+  "updates": [
+    { "field": "hook", "value": "New hook text" },
+    { "field": "rationale", "value": "New rationale" }
+  ]
+}
+\`\`\`
+If no changes are needed, just reply in markdown.`
+}
+
+**Chat history:**
+`;
     const chatHistory = messages.map((m: { role: string; content: string }) => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
     const prompt = `${systemPrompt}${chatHistory}\n\nRespond as the AI agent.`;
     const genAI = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_FREE! });
@@ -56,6 +122,16 @@ export async function POST(request: NextRequest) {
       contents: prompt,
     });
     const aiText = response?.text || '';
+    
+    // For example requests, return the plain text directly
+    if (isAskingForExample) {
+      return NextResponse.json({
+        aiMessage: aiText.trim(),
+        updatedIdea: null,
+        action: null,
+      });
+    }
+    
     // Check for action
     const action: Record<string, unknown> | null = extractActionFromGemini(aiText);
     let updatedIdea = null;
